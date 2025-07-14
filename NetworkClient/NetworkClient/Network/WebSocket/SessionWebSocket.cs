@@ -26,6 +26,7 @@ namespace NetworkClient.Network.WebSocket
         public bool IsConnected => throw new NotImplementedException();
 
         public bool IsWaitConnect => false;
+        public Exception getException { get; protected set; }
 
         public void Close()
         {

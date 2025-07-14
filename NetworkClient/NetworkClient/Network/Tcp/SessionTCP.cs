@@ -24,6 +24,7 @@ namespace NetworkClient.Network.Tcp
         private ConcurrentQueue<byte[]> msgSend;
         private Action<Message> messageCallback;
         private Action disconnectCallback;
+        public Exception getException { get; protected set; }
 
         public bool IsConnected => !IsWaitConnect && _isConnected && socket != null;
 
@@ -32,7 +33,8 @@ namespace NetworkClient.Network.Tcp
         public SessionTCP(Socket socket)
         {
             this.socket = socket;
-            
+            _isConnected = true;
+
             msgSend = new ConcurrentQueue<byte[]>();
         }
 
@@ -125,8 +127,9 @@ namespace NetworkClient.Network.Tcp
                 else
                     Interlocked.Exchange(ref isSendingInt, 0);
             }
-            catch
+            catch (Exception ex) 
             {
+                getException = ex;
                 Disconnect();
             }
         }
@@ -150,8 +153,9 @@ namespace NetworkClient.Network.Tcp
                     StartSend();
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                getException = ex;
                 Disconnect();
             }
         }
@@ -173,6 +177,7 @@ namespace NetworkClient.Network.Tcp
                 }
                 catch (Exception ex)
                 {
+                    getException = ex;
                     Disconnect();
                 }
             }
@@ -223,6 +228,7 @@ namespace NetworkClient.Network.Tcp
             }
             catch (Exception ex)
             {
+                getException = ex;
                 Disconnect();
             }
         }

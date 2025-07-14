@@ -1,4 +1,5 @@
-﻿using NetworkClient.Network.Tcp;
+﻿using NetworkClient.Models;
+using NetworkClient.Network.Tcp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,8 +14,8 @@ namespace ServerCoTuong.Clients
         public int id { get; protected set; }
         public MessageHandler msgHandler { get; protected set; }
         public SessionTCP sessionTCP;
-
-
+        public Account account;
+        public Player player => account?.player;
 
         public bool isConnectTCP => sessionTCP != null;
 
@@ -37,6 +38,12 @@ namespace ServerCoTuong.Clients
         {
             if (sessionTCP != null)
                 sessionTCP.Disconnect();
+        }
+
+        public void sendMessage(Message msg)
+        {
+            if (isConnectTCP)
+                sessionTCP.Send(msg);
         }
     }
 }

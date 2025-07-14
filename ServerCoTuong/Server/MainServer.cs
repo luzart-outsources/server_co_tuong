@@ -1,6 +1,7 @@
 ﻿using NetworkClient.Network.Tcp;
 using NetworkClient.Network.WebSocket;
 using ServerCoTuong.Clients;
+using ServerCoTuong.loggers;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -23,6 +24,7 @@ namespace ServerCoTuong.Server
         public TcpServerHandler TcpHandler;
         public WebSocketServer WsHandler;
         public ConcurrentDictionary<int, Session> SessionEntrys;
+        public bool isDebug = true;
 
 
         public MainServer()
@@ -33,6 +35,7 @@ namespace ServerCoTuong.Server
         public void startServer()
         {
             TcpHandler = new TcpServerHandler(PortTCP, AcceptConnectTCP);
+            TcpHandler.startServer();
         }
 
         private void AcceptConnectTCP(SessionTCP newSession)
@@ -41,7 +44,10 @@ namespace ServerCoTuong.Server
             {
                 var s = new Session(getNewIdSession, newSession);
                 if(SessionEntrys.TryAdd(s.id, s))
+                {
+                    csLog.logSuccess("New session: " + s.id);
                     s.start();
+                }    
                 else
                     s.Disconnect();
             }
