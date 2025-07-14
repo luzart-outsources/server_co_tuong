@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -40,6 +41,7 @@ namespace NetworkClient.Network.Tcp
         private Action disconnectCallback;
 
         private int isSendingInt;
+        public Exception getException { get; protected set; }
 
         public void Connect(string ip, int port)
         {
@@ -47,6 +49,7 @@ namespace NetworkClient.Network.Tcp
                 return;
             try
             {
+                getException = null;
                 IsWaitConnect = true;
                 _disconnected = false;
                 _isConnected = false;
@@ -56,6 +59,7 @@ namespace NetworkClient.Network.Tcp
             }
             catch (Exception ex)
             {
+                getException = ex;
                 Disconnect();
             }
         }
@@ -74,6 +78,7 @@ namespace NetworkClient.Network.Tcp
             }
             catch (Exception ex)
             {
+                getException = ex;
                 Disconnect();
             }
         }
@@ -95,6 +100,7 @@ namespace NetworkClient.Network.Tcp
                 }
                 catch (Exception ex)
                 {
+                    getException = ex;
                     Disconnect();
                 }
             }
@@ -145,6 +151,7 @@ namespace NetworkClient.Network.Tcp
             }
             catch (Exception ex)
             {
+                getException = ex;
                 Disconnect();
             }
         }

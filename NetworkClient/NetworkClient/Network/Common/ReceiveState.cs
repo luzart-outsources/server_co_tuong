@@ -1,4 +1,4 @@
-﻿using System.Buffers;
+﻿
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
@@ -26,27 +26,15 @@ namespace NetworkClient.Network.Common
         {
             _bufferSize = bufferSize;
             Offset = 0;
-            // Trả buffer cũ (dù lớn hơn hay nhỏ hơn)
-            if (_buffer != null && _buffer.Length != bufferSize)
-            {
-                ArrayPool<byte>.Shared.Return(_buffer);
-                _buffer = null;
-            }
-
-            if(_buffer == null)
-                _buffer = ArrayPool<byte>.Shared.Rent(bufferSize); // mượn mới
+            _buffer = new byte[bufferSize];
             this.isReadLenght = isReadLenght;
         }
 
         public void Clear()
         {
-            if (_buffer != null)
-            {
-                ArrayPool<byte>.Shared.Return(_buffer);
-                _buffer = null;
-                _bufferSize = 0;
-                Offset = 0;
-            }
+            _buffer = null;
+            _bufferSize = 0;
+            Offset = 0;
         }
 
         //public void setReceive(int bufferSize, bool isReadLenght)

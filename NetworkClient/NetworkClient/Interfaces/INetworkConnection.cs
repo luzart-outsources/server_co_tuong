@@ -18,5 +18,6 @@ namespace NetworkClient.Interfaces
         void Disconnect();
         bool IsConnected { get; }
         bool IsWaitConnect { get; }
+        Exception getException { get;  }
     }
 }

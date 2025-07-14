@@ -3,7 +3,6 @@ using NetworkClient.Models;
 using NetworkClient.Network.Common;
 using NetworkClient.Network.Tcp;
 using System;
-using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,6 +36,7 @@ namespace NetworkClient.Network.WebSocket
         public bool IsWaitConnect { get; protected set; }
         private bool _isDisconnected;
         private int isSendingInt;
+        public Exception getException { get; protected set; }
 
         public WebSocketClient(Action<Message> messageCallback, Action disconnectCallback)
         {
@@ -70,8 +70,9 @@ namespace NetworkClient.Network.WebSocket
                     msgSend = new ConcurrentQueue<byte[]>();
                     await ReceiveLoop();
                 }
-                catch
+                catch (Exception ex)
                 {
+                    getException = ex;
                     Disconnect();
                 }
             });
@@ -149,8 +150,9 @@ namespace NetworkClient.Network.WebSocket
                     }    
                 }    
             }
-            catch
+            catch (Exception ex) 
             {
+                getException = ex;
                 Disconnect();
             }
             finally
@@ -188,12 +190,14 @@ namespace NetworkClient.Network.WebSocket
 
                 return true;
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException e)
             {
+                getException = e;
                 return false;
             }
             catch (Exception ex)
             {
+                getException = ex;
                 return false;
             }
         }

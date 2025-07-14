@@ -23,7 +23,7 @@ namespace NetworkClient.Network.Tcp
         {
             this.port = port;
             this.acceptCallback = acceptCallback;
-            ipEndPoint = new IPEndPoint(IPAddress.Loopback, this.port);
+            ipEndPoint = new IPEndPoint(IPAddress.Any, this.port);
         }
 
         public void startServer()
@@ -32,7 +32,8 @@ namespace NetworkClient.Network.Tcp
             socketTcp.Bind(ipEndPoint);
             socketTcp.Listen(100);
             isStart = true;
-            Console.WriteLine($"Server binding port {ipEndPoint.Port}");
+            StartAccept();
+            Console.WriteLine($"Server binding port {ipEndPoint.Port}: {ipEndPoint}");
         }
 
         private void StartAccept()
