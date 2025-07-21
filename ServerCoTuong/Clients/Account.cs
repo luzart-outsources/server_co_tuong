@@ -17,6 +17,7 @@ namespace ServerCoTuong.Clients
 
         public Account(int idAcc, string user, string password, byte roleAdmin, bool isLocked)
         {
+            id = idAcc;
             User = user;
             Password = password;
             this.roleAdmin = roleAdmin;

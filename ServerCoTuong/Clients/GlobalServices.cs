@@ -1,4 +1,5 @@
 ﻿using NetworkClient.Models;
+using ServerCoTuong.CoreGame;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -87,6 +88,31 @@ namespace ServerCoTuong.Clients
                 msg.Writer.writeByte(1);
                 msg.Writer.writeString(tile);
                 msg.Writer.writeString(text);
+                session.sendMessage(msg);
+            }
+            catch (Exception e)
+            {
+
+            }
+        }
+
+        internal void sendListRoom(StateRoom[] rooms)
+        {
+            try
+            {
+                var msg = new Message(10);
+                msg.Writer.writeByte(0);
+                msg.Writer.writeShort((short)rooms.Length);
+                foreach (StateRoom room in rooms)
+                {
+                    msg.Writer.writeInt(room.id);//idroom
+                    msg.Writer.writeByte((byte)room.typeGame);//loại game play
+                    msg.Writer.writeByte((byte)room.rankLimit);//rank tối thiểu
+                    msg.Writer.writeByte((byte)room.startLimit);//số sao tối thiểu của rank
+                    msg.Writer.writeByte(room.countPlayer);//số người chơi
+                    msg.Writer.writeInt(room.countViewer);//số người đang xem
+                    msg.Writer.writeInt(room.gold);//gold
+                }
                 session.sendMessage(msg);
             }
             catch (Exception e)

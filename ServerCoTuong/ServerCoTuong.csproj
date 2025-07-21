@@ -101,6 +101,10 @@
     <Compile Include="Clients\Player.cs" />
     <Compile Include="Clients\ReadMessage.cs" />
     <Compile Include="Clients\Session.cs" />
+    <Compile Include="CoreGame\RoomManager.cs" />
+    <Compile Include="CoreGame\TypeGamePlay.cs" />
+    <Compile Include="CoreGame\StateRoom.cs" />
+    <Compile Include="CoreGame\TypeRank.cs" />
     <Compile Include="DAO\Clienrs\UserDB.cs" />
     <Compile Include="DAO\ConfigDB.cs" />
     <Compile Include="DAO\DAOManager.cs" />

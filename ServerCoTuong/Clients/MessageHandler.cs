@@ -32,7 +32,13 @@ namespace ServerCoTuong.Clients
                     if(b== 0)
                         readMessage.Login(msg);
                     else if(b == 1)
-                        readMessage.CreatePlayer(msg);
+                        readMessage.Register(msg);
+                    break;
+                case 2:
+                    readMessage.CreatePlayer(msg);
+                    break;
+                case 10:
+                    readMessage.firstGame(msg);
                     break;
             }
         }
