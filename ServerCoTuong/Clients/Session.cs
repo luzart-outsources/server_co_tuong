@@ -13,6 +13,7 @@ namespace ServerCoTuong.Clients
     {
         public int id { get; protected set; }
         public MessageHandler msgHandler { get; protected set; }
+        public GlobalServices services => msgHandler.servives;
         public SessionTCP sessionTCP;
         public Account account;
         public Player player => account?.player;

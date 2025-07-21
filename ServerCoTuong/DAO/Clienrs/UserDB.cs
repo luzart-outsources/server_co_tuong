@@ -26,14 +26,16 @@ namespace ServerCoTuong.DAO.Clienrs
                     " p.id AS idPlayer," +
                     " p.name," +
                     " p.avatar," +
-                    " p.gold" +
+                    " p.gold," +
+                    " p.rank" +
                     " FROM accounts a" +
                     " LEFT JOIN player p ON p.id_account = a.id" +
                     " WHERE (a.user = @username OR a.sdt = @sdt) AND a.password = @password LIMIT 1;";
         const string queryGetPlayer = "SELECT * player WHERE `id` = @id;";
-        const string queryCreatePlayer = "INSERT INTO `player` (`id`, `name`, `id_account`, `avatar`) VALUES (NULL, ?, ?, ?);";
+        const string queryCreatePlayer = "INSERT INTO `player` (`id`, `name`, `id_account`, `avatar`) VALUES (NULL, @name, @id_account, @avatar);";
+        const string queryRegister = "INSERT INTO `accounts` (`id`, `user`, `sdt`, `password`) VALUES (NULL, @user, @sdt, @password);";
 
-        public bool tryLogin(string username, string password, out Account account)
+        public bool tryLogin(Session s,string username, string password, out Account account)
         {
             account = null;
             try
@@ -53,7 +55,7 @@ namespace ServerCoTuong.DAO.Clienrs
                                 account = new Account(r.GetInt32("idAccount"), r.GetString("user"), r.GetString("password"), r.GetByte("roleAdmin"), r.GetBoolean("isLocked"));
                                 if (!r.IsDBNull(r.GetOrdinal("idPlayer")))
                                 {
-                                    var pl = new Player(r.GetInt32("idPlayer"), r.GetInt32("idAccount"), r.GetString("name"), r.GetString("avatar"), r.GetInt64("gold"));
+                                    var pl = new Player(s, r.GetInt32("idPlayer"), r.GetInt32("idAccount"), r.GetString("name"), r.GetString("avatar"), r.GetInt64("gold"), r.GetByte("rank"), r.GetByte("expRank"));
                                     account.player = pl;
                                 }
 
@@ -70,41 +72,7 @@ namespace ServerCoTuong.DAO.Clienrs
             return false;
         }
 
-        //internal bool tryGetPLayer(int idPlayer, out Player player)
-        //{
-        //    player = null;
-        //    try
-        //    {
-        //        using (var conn = DAOManager.INTANCE.dbServer.Connect())
-        //        {
-        //            using (MySqlCommand command = new MySqlCommand(queryGetPlayer, conn))
-        //            {
-        //                command.Parameters.AddWithValue("id", idPlayer);
-
-        //                using (MySqlDataReader r = command.ExecuteReader())
-        //                {
-        //                    if (r.Read())
-        //                    {
-        //                        account = new Account(r.GetInt32("idAccount"), r.GetString("user"), r.GetString("password"), r.GetByte("roleAdmin"), r.GetBoolean("isLocked"));
-        //                        if (!r.IsDBNull(r.GetOrdinal("idPlayer")))
-        //                        {
-        //                            account.setIdPLayer(r.GetInt32("idPlayer"));
-        //                        }
-
-        //                        return true;
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        csLog.logErr(e);
-        //    }
-        //    return false;
-        //}
-
-        public bool tryCreatePlayer(string name, int idAcc, string avat, out string notification, out Player player)
+        public bool tryCreatePlayer(Session s, string name, int idAcc, string avat, out string notification, out Player player)
         {
             notification = "";
             player = null;
@@ -114,9 +82,9 @@ namespace ServerCoTuong.DAO.Clienrs
                 {
                     using (MySqlCommand command = new MySqlCommand(queryCreatePlayer, conn))
                     {
-                        command.Parameters.Add(name);
-                        command.Parameters.Add(idAcc);
-                        command.Parameters.Add(avat);
+                        command.Parameters.AddWithValue("name" , name);
+                        command.Parameters.AddWithValue("id_account", idAcc);
+                        command.Parameters.AddWithValue("avatar",avat);
 
                         int rows = command.ExecuteNonQuery();
 
@@ -132,11 +100,14 @@ namespace ServerCoTuong.DAO.Clienrs
                                     if (reader.Read())
                                     {
                                         player = new Player(
+                                            s,
                                             reader.GetInt32("id"),
                                             reader.GetInt32("id_account"),
                                             reader.GetString("name"),
                                             reader.GetString("avatar"),
-                                            reader.GetInt64("gold") 
+                                            reader.GetInt64("gold"),
+                                            reader.GetByte("rank"),
+                                            reader.GetByte("expRank")
                                         );
                                         return true;
                                     }
@@ -149,6 +120,40 @@ namespace ServerCoTuong.DAO.Clienrs
             catch (Exception e)
             {
                 notification = "Đã có người sử dụng tên này!";
+                csLog.logErr(e);
+            }
+            notification = "Lỗi không xác định, hãy đăng nhập lại.";
+            return false;
+        }
+
+        public bool tryRegister(Session s, string user, string sdt, string pass, out string notification, out Account account)
+        {
+            notification = "";
+            account = null;
+            try
+            {
+                using (var conn = DAOManager.INTANCE.dbServer.Connect())
+                {
+                    using (MySqlCommand command = new MySqlCommand(queryRegister, conn))
+                    {
+                        command.Parameters.AddWithValue("user", user);
+                        command.Parameters.AddWithValue("sdt", sdt);
+                        command.Parameters.AddWithValue("password", pass);
+
+                        int rows = command.ExecuteNonQuery();
+
+                        if (rows > 0)
+                        {
+                            long insertedId = command.LastInsertedId;
+
+                            return tryLogin(s, user, pass, out account);
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                notification = "Tài khoản hoặc số điện thoại này đã được sử dụng!";
                 csLog.logErr(e);
             }
             notification = "Lỗi không xác định, hãy đăng nhập lại.";
