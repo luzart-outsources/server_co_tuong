@@ -8,9 +8,9 @@ namespace ServerCoTuong.CoreGame
 {
     public enum TypeGamePlay
     {
-        CoTuong,
-        CoTuongUp,
-        CoVua,
-        CoVuaUp
+        CoTuong = 0,
+        CoTuongUp = 1,
+        CoVua = 2,
+        CoVuaUp = 3
     }
 }

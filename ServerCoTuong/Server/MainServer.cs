@@ -1,4 +1,5 @@
-﻿using NetworkClient.Network.Tcp;
+﻿using NetworkClient.Models;
+using NetworkClient.Network.Tcp;
 using NetworkClient.Network.WebSocket;
 using ServerCoTuong.Clients;
 using ServerCoTuong.loggers;
@@ -53,6 +54,23 @@ namespace ServerCoTuong.Server
             }
             else
                 newSession.Disconnect();
+        }
+
+        public void sendMessageAny(Message msg, Session sAction = null)
+        {
+            try
+            {
+                var ds = SessionEntrys.Values;
+                foreach(var s in ds)
+                {
+                    if(s != null && s != sAction)
+                        s.sendMessage(msg);
+                }
+            }
+            catch(Exception e)
+            {
+
+            }
         }
     }
 }

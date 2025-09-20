@@ -96,23 +96,37 @@ namespace ServerCoTuong.Clients
             }
         }
 
-        internal void sendListRoom(StateRoom[] rooms)
+        internal void sendListRoom(int typeGamePlay, StateRoom[] rooms)
         {
             try
             {
                 var msg = new Message(10);
                 msg.Writer.writeByte(0);
+                msg.Writer.writeByte((byte)typeGamePlay);
                 msg.Writer.writeShort((short)rooms.Length);
                 foreach (StateRoom room in rooms)
                 {
                     msg.Writer.writeInt(room.id);//idroom
-                    msg.Writer.writeByte((byte)room.typeGame);//loại game play
-                    msg.Writer.writeByte((byte)room.rankLimit);//rank tối thiểu
-                    msg.Writer.writeByte((byte)room.startLimit);//số sao tối thiểu của rank
+                    msg.Writer.writeString(room.name);
                     msg.Writer.writeByte(room.countPlayer);//số người chơi
                     msg.Writer.writeInt(room.countViewer);//số người đang xem
                     msg.Writer.writeInt(room.gold);//gold
+                    msg.Writer.writeBool(room.theFast);
                 }
+                session.sendMessage(msg);
+            }
+            catch (Exception e)
+            {
+
+            }
+        }
+
+        internal void sendLeaveRoom()
+        {
+            try
+            {
+                var msg = new Message(11);
+                msg.Writer.writeByte(4);
                 session.sendMessage(msg);
             }
             catch (Exception e)

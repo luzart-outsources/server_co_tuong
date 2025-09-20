@@ -1,6 +1,7 @@
 ﻿using MySql.Data.MySqlClient;
 using ServerCoTuong.Clients;
 using ServerCoTuong.loggers;
+using ServerCoTuong.Server;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,7 +56,7 @@ namespace ServerCoTuong.DAO.Clienrs
                                 account = new Account(r.GetInt32("idAccount"), r.GetString("user"), r.GetString("password"), r.GetByte("roleAdmin"), r.GetBoolean("isLocked"));
                                 if (!r.IsDBNull(r.GetOrdinal("idPlayer")))
                                 {
-                                    var pl = new Player(s, r.GetInt32("idPlayer"), r.GetInt32("idAccount"), r.GetString("name"), r.GetString("avatar"), r.GetInt64("gold"), r.GetByte("rank"), r.GetByte("expRank"));
+                                    var pl = new Player(s, r.GetInt32("idPlayer"), r.GetInt32("idAccount"), r.GetString("name"), r.GetString("avatar"), r.GetInt64("gold"));
                                     account.player = pl;
                                 }
 
@@ -105,9 +106,7 @@ namespace ServerCoTuong.DAO.Clienrs
                                             reader.GetInt32("id_account"),
                                             reader.GetString("name"),
                                             reader.GetString("avatar"),
-                                            reader.GetInt64("gold"),
-                                            reader.GetByte("rank"),
-                                            reader.GetByte("expRank")
+                                            reader.GetInt64("gold")
                                         );
                                         return true;
                                     }
@@ -120,7 +119,9 @@ namespace ServerCoTuong.DAO.Clienrs
             catch (Exception e)
             {
                 notification = "Đã có người sử dụng tên này!";
-                csLog.logErr(e);
+                if (MainServer.INSTANCE.isDebug)
+                    csLog.logErr(e);
+                return false;
             }
             notification = "Lỗi không xác định, hãy đăng nhập lại.";
             return false;
@@ -154,7 +155,9 @@ namespace ServerCoTuong.DAO.Clienrs
             catch (Exception e)
             {
                 notification = "Tài khoản hoặc số điện thoại này đã được sử dụng!";
-                csLog.logErr(e);
+                if (MainServer.INSTANCE.isDebug)
+                    csLog.logErr(e);
+                return false;
             }
             notification = "Lỗi không xác định, hãy đăng nhập lại.";
             return false;

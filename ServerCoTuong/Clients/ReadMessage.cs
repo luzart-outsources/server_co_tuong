@@ -14,6 +14,8 @@ namespace ServerCoTuong.Clients
     {
         public Session session { get; protected set; }
         public MessageHandler handler { get; protected set; }
+        public GlobalServices services => handler.servives;
+        public Player player => session.player;
         public ReadMessage(Session session, MessageHandler handler)
         {
             this.session = session;
@@ -76,7 +78,7 @@ namespace ServerCoTuong.Clients
         /// hàm xử lý tìm phòng, tạo phòng ...vv
         /// </summary>
         /// <param name="msg"></param>
-        internal void firstGame(Message msg)
+        internal void handlerRoom(Message msg)
         {
             if(session.player == null)
             {
@@ -87,14 +89,9 @@ namespace ServerCoTuong.Clients
             var b = msg.Reader.readByte();
             if (b == 0)//tìm phòng
             {
-                var gamePlay = msg.Reader.readByte();
-                int[] types;
-                if(gamePlay == 0 || gamePlay == 1)
-                    types = new int[2] { 0,1 };
-                else
-                    types = new int[2] { 2,3 };
-                var rooms = RoomManager.INSTANCE.getRoom(types, session.player.rank);
-                session.services.sendListRoom(rooms);
+                int gamePlay = msg.Reader.readByte();
+                var rooms = RoomManager.INSTANCE.getRoom(gamePlay);
+                session.services.sendListRoom(gamePlay, rooms);
             }
             else if(b == 1)//tạo bàn
             {
@@ -102,6 +99,76 @@ namespace ServerCoTuong.Clients
                     (TypeGamePlay)msg.Reader.readByte(), //loại game 0 cờ tướng, 1 cờ tướng úp, 2 cờ vua, 3 cờ vua up
                     msg.Reader.readInt(), //gold
                     msg.Reader.readBool());//cờ nhanh?
+            }
+            else if(b == 2)//join room
+            {
+                int idRoom = msg.Reader.readInt();
+                bool isViewer = msg.Reader.readBool();
+                var room = RoomManager.INSTANCE.getRoomByID(idRoom);
+                if (room == null)
+                    session.services.sendOKDialog("Không tìm thấy phòng!");
+                else if (room.tryJoinRoom(session.player, isViewer))
+                    room.sendUpdatePlayers();
+            }
+        }
+
+        internal void chatHandler(Message msg)
+        {
+            if (session.player == null)
+            {
+                session.services.sendOKDialog("Hãy tạo nhân vật trước khi thực hiện!");
+                return;
+            }
+            var b = msg.Reader.readByte();
+            switch (b)
+            {
+                case 0:
+                case 1:
+                    //todo chat in room player
+                    session.player?.room?.chat(session.player, b, msg.Reader.readString());
+                    break;
+                case 2:
+                    ChatManager.INSTANCE.chatWorld(session.player, msg.Reader.readString());
+                    break;
+
+            }
+        }
+
+        internal void msgFirtGame(Message msg)
+        {
+            if (session.player == null || session.player.room == null)
+            {
+                session.services.sendOKDialog("Hãy vào phòng trước khi thực hiện!");
+                return;
+            }
+
+            byte b = msg.Reader.readByte();
+            switch (b)
+            {
+                case 3:
+                    session.player.room.AcceptPlay(session.player, msg.Reader.readBool());
+                    break;
+                case 4:
+                    if (session.player.room.tryLeaveRoom(session.player))
+                    {
+                        services.sendLeaveRoom();
+                        services.sendMainChar();
+                    }    
+                    break;
+            }
+        }
+
+        internal void msgBoardGame(Message msg)
+        {
+            if (player == null || player.room == null)
+                return;
+
+            byte b = msg.Reader.readByte();
+            switch (b)
+            {
+                case 1:
+                    player.room.movePiece(player, msg.Reader.readShort(), msg.Reader.readShort(), msg.Reader.readShort());
+                    break;
             }
         }
     }
