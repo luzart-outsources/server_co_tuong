@@ -1,4 +1,6 @@
 ﻿using ServerCoTuong.Clients;
+using ServerCoTuong.loggers;
+using ServerCoTuong.Server;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -18,13 +20,18 @@ namespace ServerCoTuong.CoreGame
             roomEntrys = new ConcurrentDictionary<int, StateRoom>();
         }
 
-        public StateRoom[] getRoom(int[] allowedTypes, int rank)
+        public StateRoom[] getRoom(params int[] allowedTypes)
         {
             var typeSet = new HashSet<int>(allowedTypes); // để tìm nhanh hơn
-
-            return roomEntrys.Values
-                .Where(room => typeSet.Contains((int)room.typeGame) && room.rankLimit <= rank && room.member == null)
+            var results = roomEntrys.Values
+                .Where(room => typeSet.Contains((int)room.typeGame) && room.member == null)
                 .ToArray();
+            if (MainServer.INSTANCE.isDebug)
+            {
+                string typeSetStr = string.Join(", ", typeSet);
+                csLog.Log($"    => getroom: [{typeSetStr}] | results={results.Length}");
+            }    
+            return results;
         }
 
         public void createRoom(Session s, TypeGamePlay gameplay, int gold, bool theFast)
@@ -34,12 +41,32 @@ namespace ServerCoTuong.CoreGame
                 s.services.sendOKDialog("Hãy tạo nhân vật trước khi thực hiện!");
                 return;
             }
+            if(s.player.room != null)
+            {
+                s.player.room.sendOpenRoom(s.player, false);
+                s.player.room.sendUpdatePlayers(s.player);
+                return;
+            }
             StateRoom room = new StateRoom(s.player, gameplay, gold, theFast);
             if(roomEntrys.TryAdd(room.id, room))
             {
                 s.player.joinRoom(room);
-                room.sendOpenRoom(s.player);
-            }    
+                room.sendOpenRoom(s.player, false);
+            } 
+            else
+                s.services.sendOKDialog("Đã xảy ra lỗi, hãy thử lại!");
+        }
+
+        public bool closeRoom(StateRoom room)
+        {
+            return roomEntrys.TryRemove(room.id, out var rm);
+        }
+
+        public StateRoom getRoomByID(int idRoom)
+        {
+            if(roomEntrys.TryGetValue(idRoom, out var room))
+                return room;
+            return null;
         }
     }
 }

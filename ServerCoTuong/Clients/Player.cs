@@ -1,4 +1,6 @@
 ﻿using ServerCoTuong.CoreGame;
+using ServerCoTuong.loggers;
+using ServerCoTuong.model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +11,7 @@ namespace ServerCoTuong.Clients
 {
     public class Player
     {
-        public int idSession;
+        public int idSession => session.id;
         public int idPlayer;
         public int idAccount;
         public string name;
@@ -17,11 +19,10 @@ namespace ServerCoTuong.Clients
         public long gold;
         public Session session;
         public GlobalServices services => session.services;
-        public byte rank;
-        public byte expRank;
         public StateRoom room { get; private set; }
+        public PlayerGameState gameState => room == null ? null : room.getGameState(this);
 
-        public Player(Session s, int idPlayer, int idAccount, string name, string avatar, long gold, byte rank, byte expRank)
+        public Player(Session s, int idPlayer, int idAccount, string name, string avatar, long gold)
         {
             session = s;
             this.idPlayer = idPlayer;
@@ -29,12 +30,11 @@ namespace ServerCoTuong.Clients
             this.name = name;
             this.avatar = avatar;
             this.gold = gold;
-            this.rank = rank;
-            this.expRank = expRank;
         }
 
         public void Disconnect()
         {
+            csLog.logErr($"Player {name} Disconnected");
             leaveRoom();
         }
         public void leaveRoom(bool callByRoom = false)
@@ -42,7 +42,7 @@ namespace ServerCoTuong.Clients
             if (room != null)
             {
                 if(!callByRoom)
-                    room.leaveRoom(this);
+                    room.tryLeaveRoom(this);
                 room = null;
             }    
         }

@@ -37,6 +37,7 @@ namespace ServerCoTuong.Clients
 
         public void Disconnect()
         {
+            player?.Disconnect();
             if (sessionTCP != null)
                 sessionTCP.Disconnect();
         }

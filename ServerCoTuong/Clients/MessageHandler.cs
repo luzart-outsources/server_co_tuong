@@ -23,23 +23,39 @@ namespace ServerCoTuong.Clients
 
         public void onMessage(Message msg)
         {
-            if (MainServer.INSTANCE.isDebug)
-                csLog.logWarring("receive: " + msg.Command);
-            switch (msg.Command)
+            try
             {
-                case 1:
-                    var b = msg.Reader.readByte();
-                    if(b== 0)
-                        readMessage.Login(msg);
-                    else if(b == 1)
-                        readMessage.Register(msg);
-                    break;
-                case 2:
-                    readMessage.CreatePlayer(msg);
-                    break;
-                case 10:
-                    readMessage.firstGame(msg);
-                    break;
+                if (MainServer.INSTANCE.isDebug)
+                    csLog.logWarring("receive: " + msg.Command);
+                switch (msg.Command)
+                {
+                    case 1:
+                        var b = msg.Reader.readByte();
+                        if (b == 0)
+                            readMessage.Login(msg);
+                        else if (b == 1)
+                            readMessage.Register(msg);
+                        break;
+                    case 2:
+                        readMessage.CreatePlayer(msg);
+                        break;
+                    case 4:
+                        readMessage.chatHandler(msg);
+                        break;
+                    case 10:
+                        readMessage.handlerRoom(msg);
+                        break;
+                    case 11://dữ liệu trong room, trước khi bắt đầu trận đấu
+                        readMessage.msgFirtGame(msg);
+                        break;
+                    case 12:
+                        readMessage.msgBoardGame(msg);
+                        break;
+                }
+            }
+            catch(Exception ex)
+            {
+                csLog.logErr(ex);
             }
         }
     }

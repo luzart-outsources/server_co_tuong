@@ -13,9 +13,9 @@ namespace ServerCoTuong.DAO
         {
             DBHost = "127.0.0.1",
             DBPort = 3306,
-            DBName = "game_co",
-            userName = "4y1gj31h4g3",
-            Password = "ghf%$^$g42^%htf"
+            DBName = "gamecotuong",
+            userName = "chees",
+            Password = "hj%$142UIG52i"
         };
 
         public string DBHost;
