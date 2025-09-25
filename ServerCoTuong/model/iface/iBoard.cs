@@ -19,9 +19,11 @@ namespace ServerCoTuong.model.iface
         iPieceChess KingBlack { get; }
         iPieceChess KingOther { get; }
 
-        bool isStart { get; }
+        bool isRunningGame { get; }
         bool isChessHide { get; }
         short getNewID();
+
+        void reset();
 
         iPieceChess getAt(int x, int y);
 

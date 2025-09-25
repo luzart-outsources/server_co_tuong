@@ -133,6 +133,11 @@ namespace ServerCoTuong.Helps
                 (list[i], list[j]) = (list[j], list[i]);
             }
         }
+
+        public static string formatNumber(long value)
+        {
+            return value.ToString("N0");
+        }
     }
 
 }

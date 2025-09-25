@@ -149,11 +149,7 @@ namespace ServerCoTuong.Clients
                     session.player.room.AcceptPlay(session.player, msg.Reader.readBool());
                     break;
                 case 4:
-                    if (session.player.room.tryLeaveRoom(session.player))
-                    {
-                        services.sendLeaveRoom();
-                        services.sendMainChar();
-                    }    
+                    session.player.leaveRoom();
                     break;
             }
         }

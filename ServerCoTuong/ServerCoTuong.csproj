@@ -116,6 +116,7 @@
     <Compile Include="model\co_tuong\ChineseChessBoard.cs" />
     <Compile Include="model\co_tuong\ChineseChessBoard_Helps.cs" />
     <Compile Include="model\co_tuong\ChinesePiece.cs" />
+    <Compile Include="model\enum\AnimationType.cs" />
     <Compile Include="model\enum\PieceType.cs" />
     <Compile Include="model\iface\iPieceChess.cs" />
     <Compile Include="model\iface\iBoard.cs" />
