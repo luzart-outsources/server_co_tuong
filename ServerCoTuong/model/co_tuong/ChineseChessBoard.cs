@@ -20,7 +20,7 @@ namespace ServerCoTuong.model.co_tuong
         private short _id;
 
         public iPieceChess[,] grid { get; private set; }
-        public bool isStart { get; private set; }
+        public bool isRunningGame { get; private set; }
 
         public iPieceChess[] pieBlack { get; private set; }
 
@@ -30,6 +30,17 @@ namespace ServerCoTuong.model.co_tuong
         public iPieceChess KingOther { get; private set; }
 
         public bool isChessHide { get; private set; }
+
+        public void reset()
+        {
+            KingOther = null;
+            KingBlack = null;
+            pieBlack = null;
+            pieOther = null;
+            isChessHide = false;
+            grid = new iPieceChess[10, 9]; // 9 cột, 10 hàng
+            isRunningGame = false;
+        }
 
         public iPieceChess create(PieceType type, bool isBlack, int x, int y, bool isHide)
         {
@@ -59,7 +70,7 @@ namespace ServerCoTuong.model.co_tuong
         
         public void initStandard(bool isRandom)
         {
-            isStart = true;
+            isRunningGame = true;
             isChessHide = isRandom;
             if (isRandom) // CỜ ÚP
             {
@@ -319,6 +330,7 @@ namespace ServerCoTuong.model.co_tuong
                 if (target.IsBlack == piece.IsBlack) return false; // Không ăn quân mình
                 pieceDie = target;
             }
+
 
             return true;
         }

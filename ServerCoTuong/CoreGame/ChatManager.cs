@@ -17,7 +17,7 @@ namespace ServerCoTuong.CoreGame
 
         public void chatWorld(Player pAction, string text)
         {
-            var msg = new Message(4);
+            var msg = new Message(5);
             msg.Writer.writeByte(2);
             msg.Writer.writeInt(pAction.idSession);
             msg.Writer.writeString(pAction.name);
@@ -27,7 +27,7 @@ namespace ServerCoTuong.CoreGame
 
         public void chatP2P(Player pAction, int idSession, string text)
         {
-            var msg = new Message(4);
+            var msg = new Message(5);
             msg.Writer.writeByte(3);
             msg.Writer.writeInt(pAction.idSession);
             msg.Writer.writeString(pAction.name);

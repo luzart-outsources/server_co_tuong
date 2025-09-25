@@ -152,7 +152,7 @@ namespace ServerCoTuong.CoreGame
 
         public void chat(Player player, int type, string v)
         {
-            var msg = new Message(4);
+            var msg = new Message(5);
             if (type == 0 && (player == master || player == member))
                 msg.Writer.writeByte(0);
             else if (type == 1)
@@ -205,16 +205,46 @@ namespace ServerCoTuong.CoreGame
         {
             if (curStateTurn == null)
                 return;
-            long time = timeWaitTurn - (Utils.currentTimeMillis() - curStateTurn.timeStartTurn);
+            long timeN = Utils.currentTimeMillis();
+            long time = timeWaitTurn - (timeN - curStateTurn.timeStartTurn);
+            long timeEnd = curStateTurn.timeEndGame - (timeN - curStateTurn.timeStartTurn);
+            var gs = curStateTurn == gameStateMaster ? gameStateMember : gameStateMaster;
+
+            long timeEnd2 = gs == null? 0 :  gs.timeEndGame - (timeN - gs.timeStartTurn);
             var msg = new Message(12);
             msg.Writer.writeByte(2);
             msg.Writer.writeInt(curStateTurn.player.idSession);
             msg.Writer.writeLong(time);
+            msg.Writer.writeLong(timeEnd);
+            msg.Writer.writeLong(timeEnd2);
 
-            if(pOnly != null)
+            if (pOnly != null)
                 pOnly.session.sendMessage(msg);
             else
                 sendMessForAny(msg);
+        }
+
+        private void sendAnimation(Player pID, AnimationType type, int idPiece, Player pOnly = null)
+        {
+            if(pID == null) return;
+            var msg = new Message(12);
+            msg.Writer.writeByte(4);
+            msg.Writer.writeInt(pID.idSession);
+            msg.Writer.writeByte((byte)type);
+            msg.Writer.writeShort(idPiece);
+
+            if(pOnly != null)
+                pOnly.session.sendMessage(msg);
+            else sendMessForAny(msg);
+        }
+
+        public void sendResetGameBoard(Player pOnly = null)
+        {
+            var msg = new Message(11);
+            msg.Writer.writeByte(5);
+            if (pOnly != null)
+                pOnly.session.sendMessage(msg);
+            else sendMessForAny(msg);
         }
     }
 }

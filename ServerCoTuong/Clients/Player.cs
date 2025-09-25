@@ -36,13 +36,17 @@ namespace ServerCoTuong.Clients
         {
             csLog.logErr($"Player {name} Disconnected");
             leaveRoom();
+            //todo save to csdl
         }
         public void leaveRoom(bool callByRoom = false)
         {
             if (room != null)
             {
-                if(!callByRoom)
-                    room.tryLeaveRoom(this);
+                if(!callByRoom && room.tryLeaveRoom(this))
+                {
+                    services.sendLeaveRoom();
+                    services.sendMainChar();
+                }
                 room = null;
             }    
         }

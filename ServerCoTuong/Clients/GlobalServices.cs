@@ -57,7 +57,7 @@ namespace ServerCoTuong.Clients
             try
             {
                 var msg = new Message(4);
-
+                msg.Writer.writeInt(0);
                 if (session.player == null)
                 {
                     msg.Writer.writeInt(-1);
@@ -87,6 +87,21 @@ namespace ServerCoTuong.Clients
                 var msg = new Message(3);
                 msg.Writer.writeByte(1);
                 msg.Writer.writeString(tile);
+                msg.Writer.writeString(text);
+                session.sendMessage(msg);
+            }
+            catch (Exception e)
+            {
+
+            }
+        }
+
+        public void sendToast(string text)
+        {
+            try
+            {
+                var msg = new Message(3);
+                msg.Writer.writeByte(2);
                 msg.Writer.writeString(text);
                 session.sendMessage(msg);
             }
@@ -133,6 +148,29 @@ namespace ServerCoTuong.Clients
             {
 
             }
+        }
+
+        /// <summary>
+        /// update money
+        /// </summary>
+        
+        internal void sendUpdateMoney()
+        {
+            try
+            {
+                var msg = new Message(4);
+                msg.Writer.writeInt(1);
+                if (session.player == null)
+                    msg.Writer.writeLong(0);
+                else
+                    msg.Writer.writeLong(session.player.gold);
+                session.sendMessage(msg);
+            }
+            catch (Exception e)
+            {
+
+            }
+
         }
     }
 }

@@ -1,10 +1,12 @@
 ﻿using ServerCoTuong.Clients;
+using ServerCoTuong.Helps;
 using ServerCoTuong.loggers;
 using ServerCoTuong.Server;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -45,6 +47,11 @@ namespace ServerCoTuong.CoreGame
             {
                 s.player.room.sendOpenRoom(s.player, false);
                 s.player.room.sendUpdatePlayers(s.player);
+                return;
+            }
+            if(s.player.gold < gold)
+            {
+                s.player.services.sendOKDialog($"Bạn không đủ {Utils.formatNumber(gold)} gold.");
                 return;
             }
             StateRoom room = new StateRoom(s.player, gameplay, gold, theFast);

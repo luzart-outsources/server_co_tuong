@@ -39,7 +39,7 @@ namespace ServerCoTuong.Clients
                     case 2:
                         readMessage.CreatePlayer(msg);
                         break;
-                    case 4:
+                    case 5:
                         readMessage.chatHandler(msg);
                         break;
                     case 10:
