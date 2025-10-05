@@ -1,8 +1,11 @@
 ﻿using NetworkClient.Models;
 using ServerCoTuong.Clients;
 using ServerCoTuong.Helps;
+using ServerCoTuong.loggers;
 using ServerCoTuong.model.@enum;
 using ServerCoTuong.model.iface;
+using ServerCoTuong.Server;
+using ServerCoTuong.services;
 using System;
 using System.Collections.Generic;
 using System.IO.Pipelines;
@@ -162,6 +165,7 @@ namespace ServerCoTuong.CoreGame
             msg.Writer.writeInt(player.idSession);
             msg.Writer.writeString(player.name);
             msg.Writer.writeString(v);
+            
 
             sendMessForAny(msg, player);
         }
@@ -180,7 +184,7 @@ namespace ServerCoTuong.CoreGame
             var msg = new Message(12);
             msg.Writer.writeByte(1);
             msg.Writer.writeShort(piece.Id);
-            msg.Writer.writeByte((byte)piece.TypeView);
+            msg.Writer.writeSByte((byte)piece.TypeView);
             msg.Writer.writeShort(piece.x);
             msg.Writer.writeShort(piece.y);
             if(pieceDie == null)
@@ -207,10 +211,10 @@ namespace ServerCoTuong.CoreGame
                 return;
             long timeN = Utils.currentTimeMillis();
             long time = timeWaitTurn - (timeN - curStateTurn.timeStartTurn);
-            long timeEnd = curStateTurn.timeEndGame - (timeN - curStateTurn.timeStartTurn);
+            long timeEnd = curStateTurn.timeEndGame;
             var gs = curStateTurn == gameStateMaster ? gameStateMember : gameStateMaster;
 
-            long timeEnd2 = gs == null? 0 :  gs.timeEndGame - (timeN - gs.timeStartTurn);
+            long timeEnd2 = gs == null? 0 :  gs.timeEndGame;
             var msg = new Message(12);
             msg.Writer.writeByte(2);
             msg.Writer.writeInt(curStateTurn.player.idSession);
@@ -245,6 +249,25 @@ namespace ServerCoTuong.CoreGame
             if (pOnly != null)
                 pOnly.session.sendMessage(msg);
             else sendMessForAny(msg);
+        }
+
+        internal void requestJoinRoom(Player player, string nameP)
+        {
+            long time = Utils.currentTimeMillis();
+            if (!SessionManager.INSTANCE.tryGetSessionByName(nameP, out var s))
+                player.services.sendToast($"{nameP} không còn online");
+            else if (s.player.room != null && s.player.room.boardGame.isRunningGame)
+                player.services.sendToast($"{nameP} Đang trong trận đấu");
+            else if(playerInvites.Count >= MainConfig.MaxInviteRoom)
+                player.services.sendToast($"Cùng lúc chỉ có thể gửi tối đa {MainConfig.MaxInviteRoom} lời mời");
+            else if(playerInvites.TryGetValue(player.idPlayer, out var timeInvite) && time - timeInvite < 10_000)
+                player.services.sendToast($"Chỉ có thể mời lại sau {(10_000 - (time - timeInvite) / 1000)} giây nữa");
+            else
+            {
+                playerInvites[player.idPlayer] = time;
+                NotifyService.INSTANCE.PushYesNo(player, TypeNotifyYesNo.InviteRoom, this.id, $"{player.name} mời bạn vào phòng", false);
+                player.services.sendToast($"Đã gửi lời mời đến {nameP}");
+            }    
         }
     }
 }

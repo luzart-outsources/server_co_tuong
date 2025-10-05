@@ -119,7 +119,7 @@ namespace ServerCoTuong.DAO.Clienrs
             catch (Exception e)
             {
                 notification = "Đã có người sử dụng tên này!";
-                if (MainServer.INSTANCE.isDebug)
+                if (MainConfig.isDebug)
                     csLog.logErr(e);
                 return false;
             }
@@ -155,7 +155,7 @@ namespace ServerCoTuong.DAO.Clienrs
             catch (Exception e)
             {
                 notification = "Tài khoản hoặc số điện thoại này đã được sử dụng!";
-                if (MainServer.INSTANCE.isDebug)
+                if (MainConfig.isDebug)
                     csLog.logErr(e);
                 return false;
             }

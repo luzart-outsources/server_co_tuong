@@ -97,25 +97,34 @@
   <ItemGroup>
     <Compile Include="Clients\Account.cs" />
     <Compile Include="Clients\GlobalServices.cs" />
+    <Compile Include="Clients\HistoryGame.cs" />
     <Compile Include="Clients\MessageHandler.cs" />
     <Compile Include="Clients\Player.cs" />
     <Compile Include="Clients\ReadMessage.cs" />
     <Compile Include="Clients\Session.cs" />
+    <Compile Include="Clients\TypeNotifyYesNo.cs" />
     <Compile Include="CoreGame\RoomManager.cs" />
     <Compile Include="CoreGame\StateRoom_Services.cs" />
     <Compile Include="CoreGame\TypeGamePlay.cs" />
     <Compile Include="CoreGame\StateRoom.cs" />
     <Compile Include="CoreGame\TypeRank.cs" />
     <Compile Include="CoreGame\ChatManager.cs" />
+    <Compile Include="DAO\Clienrs\FriendDB.cs" />
     <Compile Include="DAO\Clienrs\UserDB.cs" />
     <Compile Include="DAO\ConfigDB.cs" />
     <Compile Include="DAO\DAOManager.cs" />
     <Compile Include="DAO\SQL.cs" />
+    <Compile Include="friend\FriendRecord.cs" />
+    <Compile Include="friend\FriendService.cs" />
+    <Compile Include="friend\FriendStatus.cs" />
+    <Compile Include="friend\iFriendRepository.cs" />
     <Compile Include="Helps\Utils.cs" />
     <Compile Include="loggers\csLog.cs" />
     <Compile Include="model\co_tuong\ChineseChessBoard.cs" />
     <Compile Include="model\co_tuong\ChineseChessBoard_Helps.cs" />
     <Compile Include="model\co_tuong\ChinesePiece.cs" />
+    <Compile Include="model\co_vua\ChessBoard.cs" />
+    <Compile Include="model\co_vua\ChessPiece.cs" />
     <Compile Include="model\enum\AnimationType.cs" />
     <Compile Include="model\enum\PieceType.cs" />
     <Compile Include="model\iface\iPieceChess.cs" />
@@ -123,7 +132,11 @@
     <Compile Include="model\PlayerGameState.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Server\MainConfig.cs" />
     <Compile Include="Server\MainServer.cs" />
+    <Compile Include="Server\SessionManager.cs" />
+    <Compile Include="services\iface\INotifyService.cs" />
+    <Compile Include="services\NotifyService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -31,6 +31,8 @@ namespace ServerCoTuong.model.co_tuong
 
         public bool isChessHide { get; private set; }
 
+        public (int x, int y)? enPassantTarget => throw new NotImplementedException();
+
         public void reset()
         {
             KingOther = null;
@@ -45,7 +47,7 @@ namespace ServerCoTuong.model.co_tuong
         public iPieceChess create(PieceType type, bool isBlack, int x, int y, bool isHide)
         {
             var p = new ChinesePiece(getNewID(), type, isBlack, x, y, isHide); 
-            if(p.Type == PieceType.KING)
+            if(p.Type == PieceType.CHINESE_KING)
             {
                 if (isBlack)
                     KingBlack = p;
@@ -76,18 +78,18 @@ namespace ServerCoTuong.model.co_tuong
             {
                 List<PieceType> redPieces = new List<PieceType>()
                 {
-                    PieceType.ROOK, PieceType.HORSE, PieceType.ELEPHANT, PieceType.ADVISOR,
-                    PieceType.ADVISOR, PieceType.ELEPHANT, PieceType.HORSE, PieceType.ROOK,
-                    PieceType.CANNON, PieceType.CANNON,
-                    PieceType.PAWN, PieceType.PAWN, PieceType.PAWN, PieceType.PAWN, PieceType.PAWN
+                    PieceType.CHINESE_ROOK, PieceType.CHINESE_HORSE, PieceType.CHINESE_ELEPHANT, PieceType.CHINESE_ADVISOR,
+                    PieceType.CHINESE_ADVISOR, PieceType.CHINESE_ELEPHANT, PieceType.CHINESE_HORSE, PieceType.CHINESE_ROOK,
+                    PieceType.CHINESE_CANNON, PieceType.CHINESE_CANNON,
+                    PieceType.CHINESE_PAWN, PieceType.CHINESE_PAWN, PieceType.CHINESE_PAWN, PieceType.CHINESE_PAWN, PieceType.CHINESE_PAWN
                 };
 
                 List<PieceType> blackPieces = new List<PieceType>()
                 {
-                    PieceType.ROOK, PieceType.HORSE, PieceType.ELEPHANT, PieceType.ADVISOR,
-                    PieceType.ADVISOR, PieceType.ELEPHANT, PieceType.HORSE, PieceType.ROOK,
-                    PieceType.CANNON, PieceType.CANNON,
-                    PieceType.PAWN, PieceType.PAWN, PieceType.PAWN, PieceType.PAWN, PieceType.PAWN
+                    PieceType.CHINESE_ROOK, PieceType.CHINESE_HORSE, PieceType.CHINESE_ELEPHANT, PieceType.CHINESE_ADVISOR,
+                    PieceType.CHINESE_ADVISOR, PieceType.CHINESE_ELEPHANT, PieceType.CHINESE_HORSE, PieceType.CHINESE_ROOK,
+                    PieceType.CHINESE_CANNON, PieceType.CHINESE_CANNON,
+                    PieceType.CHINESE_PAWN, PieceType.CHINESE_PAWN, PieceType.CHINESE_PAWN, PieceType.CHINESE_PAWN, PieceType.CHINESE_PAWN
                 };
 
                 Utils.Shuffle(redPieces);
@@ -115,7 +117,7 @@ namespace ServerCoTuong.model.co_tuong
                     pieOther[idx++] = create(redQ.Dequeue(), false, x, 6, true);
                 }
                 // Tướng mở
-                pieOther[idx++] = create(PieceType.KING, false, 4, 9, false);
+                pieOther[idx++] = create(PieceType.CHINESE_KING, false, 4, 9, false);
 
                 // --- Đặt quân đen ---
                 pieBlack = new iPieceChess[16];
@@ -136,53 +138,53 @@ namespace ServerCoTuong.model.co_tuong
                     pieBlack[idx++] = create(blackQ.Dequeue(), true, x, 3, true);
                 }
                 // Tướng mở
-                pieBlack[idx++] = create(PieceType.KING, true, 4, 0, false);
+                pieBlack[idx++] = create(PieceType.CHINESE_KING, true, 4, 0, false);
             }
             else
             {
                 // Quân đỏ (RED) ở phía dưới (hàng y=9)
                 pieOther = new iPieceChess[] {
-                create(PieceType.ROOK, false, 0, 9, false),
-                create(PieceType.HORSE, false, 1, 9, false),
-                create(PieceType.ELEPHANT, false, 2, 9, false),
-                create(PieceType.ADVISOR, false, 3, 9, false),
-                create(PieceType.KING, false, 4, 9, false),
-                create(PieceType.ADVISOR, false, 5, 9, false),
-                create(PieceType.ELEPHANT, false, 6, 9, false),
-                create(PieceType.HORSE, false, 7, 9, false),
-                create(PieceType.ROOK, false, 8, 9, false),
+                create(PieceType.CHINESE_ROOK, false, 0, 9, false),
+                create(PieceType.CHINESE_HORSE, false, 1, 9, false),
+                create(PieceType.CHINESE_ELEPHANT, false, 2, 9, false),
+                create(PieceType.CHINESE_ADVISOR, false, 3, 9, false),
+                create(PieceType.CHINESE_KING, false, 4, 9, false),
+                create(PieceType.CHINESE_ADVISOR, false, 5, 9, false),
+                create(PieceType.CHINESE_ELEPHANT, false, 6, 9, false),
+                create(PieceType.CHINESE_HORSE, false, 7, 9, false),
+                create(PieceType.CHINESE_ROOK, false, 8, 9, false),
 
-                create(PieceType.CANNON, false, 1, 7, false),
-                create(PieceType.CANNON, false, 7, 7, false),
+                create(PieceType.CHINESE_CANNON, false, 1, 7, false),
+                create(PieceType.CHINESE_CANNON, false, 7, 7, false),
 
-                create(PieceType.PAWN, false, 0, 6, false),
-                create(PieceType.PAWN, false, 2, 6, false),
-                create(PieceType.PAWN, false, 4, 6, false),
-                create(PieceType.PAWN, false, 6, 6, false),
-                create(PieceType.PAWN, false, 8, 6, false),
+                create(PieceType.CHINESE_PAWN, false, 0, 6, false),
+                create(PieceType.CHINESE_PAWN, false, 2, 6, false),
+                create(PieceType.CHINESE_PAWN, false, 4, 6, false),
+                create(PieceType.CHINESE_PAWN, false, 6, 6, false),
+                create(PieceType.CHINESE_PAWN, false, 8, 6, false),
             };
 
-                // Quân đen (BLACK) ở phía trên (hàng y=0)
-                pieBlack = new iPieceChess[]
-                {
-                create(PieceType.ROOK, true, 0, 0, false),
-                create(PieceType.HORSE, true, 1, 0, false),
-                create(PieceType.ELEPHANT, true, 2, 0, false),
-                create(PieceType.ADVISOR, true, 3, 0, false),
-                create(PieceType.KING, true, 4, 0, false),
-                create(PieceType.ADVISOR, true, 5, 0, false),
-                create(PieceType.ELEPHANT, true, 6, 0, false),
-                create(PieceType.HORSE, true, 7, 0, false),
-                create(PieceType.ROOK, true, 8, 0, false),
+            // Quân đen (BLACK) ở phía trên (hàng y=0)
+            pieBlack = new iPieceChess[]
+            {
+                create(PieceType.CHINESE_ROOK, true, 0, 0, false),
+                create(PieceType.CHINESE_HORSE, true, 1, 0, false),
+                create(PieceType.CHINESE_ELEPHANT, true, 2, 0, false),
+                create(PieceType.CHINESE_ADVISOR, true, 3, 0, false),
+                create(PieceType.CHINESE_KING, true, 4, 0, false),
+                create(PieceType.CHINESE_ADVISOR, true, 5, 0, false),
+                create(PieceType.CHINESE_ELEPHANT, true, 6, 0, false),
+                create(PieceType.CHINESE_HORSE, true, 7, 0, false),
+                create(PieceType.CHINESE_ROOK, true, 8, 0, false),
 
-                create(PieceType.CANNON, true, 1, 2, false),
-                create(PieceType.CANNON, true, 7, 2, false),
+                create(PieceType.CHINESE_CANNON, true, 1, 2, false),
+                create(PieceType.CHINESE_CANNON, true, 7, 2, false),
 
-                create(PieceType.PAWN, true, 0, 3, false),
-                create(PieceType.PAWN, true, 2, 3, false),
-                create(PieceType.PAWN, true, 4, 3, false),
-                create(PieceType.PAWN, true, 6, 3, false),
-                create(PieceType.PAWN, true, 8, 3, false),
+                create(PieceType.CHINESE_PAWN, true, 0, 3, false),
+                create(PieceType.CHINESE_PAWN, true, 2, 3, false),
+                create(PieceType.CHINESE_PAWN, true, 4, 3, false),
+                create(PieceType.CHINESE_PAWN, true, 6, 3, false),
+                create(PieceType.CHINESE_PAWN, true, 8, 3, false),
                 };
             }
         }
@@ -192,7 +194,7 @@ namespace ServerCoTuong.model.co_tuong
             if (!IsValid(x, y)) return;
 
             grid[y,x] = p;
-            if (p != null) 
+            if (p != null && (p.x != x || p.y != y))
                 p.moveTo(x, y);
         }
 
@@ -231,6 +233,8 @@ namespace ServerCoTuong.model.co_tuong
             return x >= 0 && x < getCol() && y >= 0 && y < getRow();
         }
 
+        public bool tryMovePiece(iPieceChess piece, int xNew, int yNew, PieceType typePhongCap, out iPieceChess pieceDie)
+            => tryMovePiece(piece, xNew, yNew,out pieceDie);
         public bool tryMovePiece(iPieceChess piece, int xNew, int yNew, out iPieceChess pieceDie)
         {
             bool success = tryCanMovePiece(piece, xNew, yNew, out pieceDie);
@@ -265,8 +269,8 @@ namespace ServerCoTuong.model.co_tuong
             // 2. Kiểm tra va chạm theo loại quân
             switch (type)
             {
-                case PieceType.ROOK: // Xe
-                case PieceType.CANNON:
+                case PieceType.CHINESE_ROOK: // Xe
+                case PieceType.CHINESE_CANNON:
                     if (dx == 0) // đi dọc
                     {
                         int step = dy > 0 ? 1 : -1;
@@ -275,8 +279,8 @@ namespace ServerCoTuong.model.co_tuong
                         {
                             if (grid[y, piece.x] != null) count++;
                         }
-                        if (type == PieceType.ROOK && count > 0) return false;
-                        if (type == PieceType.CANNON)
+                        if (type == PieceType.CHINESE_ROOK && count > 0) return false;
+                        if (type == PieceType.CHINESE_CANNON)
                         {
                             if (grid[yNew, xNew] == null && count > 0) return false; // đi thường
                             if (grid[yNew, xNew] != null && count != 1) return false; // ăn quân
@@ -290,8 +294,8 @@ namespace ServerCoTuong.model.co_tuong
                         {
                             if (grid[piece.y, x] != null) count++;
                         }
-                        if (type == PieceType.ROOK && count > 0) return false;
-                        if (type == PieceType.CANNON)
+                        if (type == PieceType.CHINESE_ROOK && count > 0) return false;
+                        if (type == PieceType.CHINESE_CANNON)
                         {
                             if (grid[yNew, xNew] == null && count > 0) return false;
                             if (grid[yNew, xNew] != null && count != 1) return false;
@@ -299,7 +303,7 @@ namespace ServerCoTuong.model.co_tuong
                     }
                     break;
 
-                case PieceType.HORSE: // Mã
+                case PieceType.CHINESE_HORSE: // Mã
                     if (Math.Abs(dx) == 2 && Math.Abs(dy) == 1)
                     {
                         int blockX = piece.x + dx / 2;
@@ -314,7 +318,7 @@ namespace ServerCoTuong.model.co_tuong
                     }
                     break;
 
-                case PieceType.ELEPHANT: // Tượng
+                case PieceType.CHINESE_ELEPHANT: // Tượng
                     int midX = (piece.x + xNew) / 2;
                     int midY = (piece.y + yNew) / 2;
                     if (grid[midY, midX] != null) return false;
@@ -322,6 +326,12 @@ namespace ServerCoTuong.model.co_tuong
             }
             if (IsKingFaceToFace(piece, xNew, yNew))
                 return false;
+            var king = piece.IsBlack ? KingBlack : KingOther;
+            if (piece != king && isSquareAttacked(king.x, king.y, !piece.IsBlack))
+            {
+                pieceDie = king;
+                return false;
+            }    
 
             // 3. Xử lý ăn quân
             iPieceChess target = grid[yNew, xNew];
@@ -335,13 +345,27 @@ namespace ServerCoTuong.model.co_tuong
             return true;
         }
 
+        // Kiểm tra xem 1 ô có bị phe "byBlack" tấn công không
+        private bool isSquareAttacked(int x, int y, bool byBlack)
+        {
+            foreach (var p in getPieceLive())
+            {
+                if (p.IsBlack == byBlack)
+                {
+                    if (tryCanMovePiece(p, x, y, out _))
+                        return true;
+                }
+            }
+            return false;
+        }
+
         private bool IsKingFaceToFace(iPieceChess movingPiece, int xNew, int yNew)
         {
             // Tìm vị trí tướng 2 bên
             iPieceChess redKing = null, blackKing = null;
             foreach (var p in getPieceLive())
             {
-                if (p.Type == PieceType.KING && !p.isHide && p.isAlive)
+                if (p.Type == PieceType.CHINESE_KING && !p.isHide && p.isAlive)
                 {
                     if (p.IsBlack) blackKing = p;
                     else redKing = p;
@@ -472,7 +496,7 @@ namespace ServerCoTuong.model.co_tuong
             foreach (var a in attackers)
             {
                 var aType = EffectiveType(a);
-                if (aType != PieceType.CANNON) continue;
+                if (aType != PieceType.CHINESE_CANNON) continue;
 
                 var between = RaySquaresBetween(a.x, a.y, king.x, king.y).ToList();
                 if (between.Count == 0) continue;

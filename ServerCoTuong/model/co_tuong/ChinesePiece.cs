@@ -18,6 +18,9 @@ namespace ServerCoTuong.model.co_tuong
         public short y { get; private set; }
         public bool isAlive { get; set; }
         public bool isHide { get; set; }
+
+        public bool firtMove => throw new NotImplementedException();
+
         private bool isChessHide;
 
         public ChinesePiece(int id, PieceType Type, bool IsBlack, int x, int y, bool isHide)
@@ -48,35 +51,35 @@ namespace ServerCoTuong.model.co_tuong
 
             switch (Type)
             {
-                case PieceType.ROOK: // Xe: đi thẳng
+                case PieceType.CHINESE_ROOK: // Xe: đi thẳng
                     return (dx == 0 || dy == 0);
 
-                case PieceType.HORSE: // Mã: đi chữ L
+                case PieceType.CHINESE_HORSE: // Mã: đi chữ L
                     return (Math.Abs(dx) == 1 && Math.Abs(dy) == 2) ||
                            (Math.Abs(dx) == 2 && Math.Abs(dy) == 1);
 
-                case PieceType.ELEPHANT: // Tượng: đi chéo 2 ô, không qua sông
+                case PieceType.CHINESE_ELEPHANT: // Tượng: đi chéo 2 ô, không qua sông
                     if (isChessHide)
                         return Math.Abs(dx) == 2 && Math.Abs(dy) == 2;
                     return Math.Abs(dx) == 2 && Math.Abs(dy) == 2 &&
                            (IsBlack ? yNew <= 4 : yNew >= 5);
 
-                case PieceType.ADVISOR: // Sĩ: đi chéo trong cung
+                case PieceType.CHINESE_ADVISOR: // Sĩ: đi chéo trong cung
                     if (isChessHide)
                         return Math.Abs(dx) == 1 && Math.Abs(dy) == 1;
                     return Math.Abs(dx) == 1 && Math.Abs(dy) == 1 &&
                            (xNew >= 3 && xNew <= 5) &&
                            (IsBlack ? (yNew >= 0 && yNew <= 2) : (yNew >= 7 && yNew <= 9));
 
-                case PieceType.KING: // Tướng: đi thẳng trong cung
+                case PieceType.CHINESE_KING: // Tướng: đi thẳng trong cung
                     return ((Math.Abs(dx) == 1 && dy == 0) || (dx == 0 && Math.Abs(dy) == 1)) &&
                            (xNew >= 3 && xNew <= 5) &&
                            (IsBlack ? (yNew >= 0 && yNew <= 2) : (yNew >= 7 && yNew <= 9));
 
-                case PieceType.CANNON: // Pháo: đi thẳng, ăn quân thì xử lý ở Board
+                case PieceType.CHINESE_CANNON: // Pháo: đi thẳng, ăn quân thì xử lý ở Board
                     return (dx == 0 || dy == 0);
 
-                case PieceType.PAWN: // Tốt
+                case PieceType.CHINESE_PAWN: // Tốt
                     if (IsBlack)
                     {
                         if (y <= 4) // chưa qua sông → chỉ đi xuống
@@ -112,23 +115,23 @@ namespace ServerCoTuong.model.co_tuong
                     switch (x)
                     {
                         case 0:
-                        case 8: return PieceType.ROOK;
+                        case 8: return PieceType.CHINESE_ROOK;
                         case 1:
-                        case 7: return PieceType.HORSE;
+                        case 7: return PieceType.CHINESE_HORSE;
                         case 2:
-                        case 6: return PieceType.ELEPHANT;
+                        case 6: return PieceType.CHINESE_ELEPHANT;
                         case 3:
-                        case 5: return PieceType.ADVISOR;
-                        case 4: return PieceType.KING;
+                        case 5: return PieceType.CHINESE_ADVISOR;
+                        case 4: return PieceType.CHINESE_KING;
                     }
                 }
                 else if (y == 2 && (x == 1 || x == 7))
                 {
-                    return PieceType.CANNON;
+                    return PieceType.CHINESE_CANNON;
                 }
                 else if (y == 3 && x % 2 == 0)
                 {
-                    return PieceType.PAWN;
+                    return PieceType.CHINESE_PAWN;
                 }
             }
             else // quân đỏ (dưới, y=5..9)
@@ -138,23 +141,23 @@ namespace ServerCoTuong.model.co_tuong
                     switch (x)
                     {
                         case 0:
-                        case 8: return PieceType.ROOK;
+                        case 8: return PieceType.CHINESE_ROOK;
                         case 1:
-                        case 7: return PieceType.HORSE;
+                        case 7: return PieceType.CHINESE_HORSE;
                         case 2:
-                        case 6: return PieceType.ELEPHANT;
+                        case 6: return PieceType.CHINESE_ELEPHANT;
                         case 3:
-                        case 5: return PieceType.ADVISOR;
-                        case 4: return PieceType.KING;
+                        case 5: return PieceType.CHINESE_ADVISOR;
+                        case 4: return PieceType.CHINESE_KING;
                     }
                 }
                 else if (y == 7 && (x == 1 || x == 7))
                 {
-                    return PieceType.CANNON;
+                    return PieceType.CHINESE_CANNON;
                 }
                 else if (y == 6 && x % 2 == 0)
                 {
-                    return PieceType.PAWN;
+                    return PieceType.CHINESE_PAWN;
                 }
             }
 

@@ -28,11 +28,25 @@ namespace ServerCoTuong.CoreGame
             var results = roomEntrys.Values
                 .Where(room => typeSet.Contains((int)room.typeGame) && room.member == null)
                 .ToArray();
-            if (MainServer.INSTANCE.isDebug)
+            if (MainConfig.isDebug)
             {
                 string typeSetStr = string.Join(", ", typeSet);
                 csLog.Log($"    => getroom: [{typeSetStr}] | results={results.Length}");
             }    
+            return results;
+        }
+
+        public StateRoom[] getRoomViews(params int[] allowedTypes)
+        {
+            var typeSet = new HashSet<int>(allowedTypes); // để tìm nhanh hơn
+            var results = roomEntrys.Values
+                .Where(room => typeSet.Contains((int)room.typeGame) && room.member != null && room.boardGame?.isRunningGame == true)
+                .ToArray();
+            if (MainConfig.isDebug)
+            {
+                string typeSetStr = string.Join(", ", typeSet);
+                csLog.Log($"    => getroomViews: [{typeSetStr}] | results={results.Length}");
+            }
             return results;
         }
 

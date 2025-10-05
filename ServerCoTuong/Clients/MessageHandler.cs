@@ -25,7 +25,7 @@ namespace ServerCoTuong.Clients
         {
             try
             {
-                if (MainServer.INSTANCE.isDebug)
+                if (MainConfig.isDebug)
                     csLog.logWarring("receive: " + msg.Command);
                 switch (msg.Command)
                 {
@@ -39,6 +39,9 @@ namespace ServerCoTuong.Clients
                     case 2:
                         readMessage.CreatePlayer(msg);
                         break;
+                    case 3:
+                        readMessage.msgActionNotify(msg);
+                        break;
                     case 5:
                         readMessage.chatHandler(msg);
                         break;
@@ -50,6 +53,12 @@ namespace ServerCoTuong.Clients
                         break;
                     case 12:
                         readMessage.msgBoardGame(msg);
+                        break;
+                    case 13:
+                        readMessage.msgActionPlayer(msg);
+                        break;
+                    case 14:
+                        readMessage.msgActionFriend(msg);
                         break;
                 }
             }

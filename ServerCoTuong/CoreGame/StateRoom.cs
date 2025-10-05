@@ -6,6 +6,7 @@ using ServerCoTuong.Helps;
 using ServerCoTuong.loggers;
 using ServerCoTuong.model;
 using ServerCoTuong.model.co_tuong;
+using ServerCoTuong.model.co_vua;
 using ServerCoTuong.model.@enum;
 using ServerCoTuong.model.iface;
 using ServerCoTuong.Server;
@@ -48,6 +49,8 @@ namespace ServerCoTuong.CoreGame
         private int timeWaitTurn;
         private PlayerGameState curStateTurn;
         private long timeNow, timeWaitEndGame;
+        private ConcurrentDictionary<int, long> playerInvites;
+        private long timeDeleteInvite;
 
         public StateRoom(Player master, TypeGamePlay gameplay, int gold, bool theFast)
         {
@@ -57,14 +60,14 @@ namespace ServerCoTuong.CoreGame
             this.typeGame = gameplay;
             this.gold = gold;
             viewers = new ConcurrentDictionary<int, Player>();
+            playerInvites = new ConcurrentDictionary<int, long>();
             this.theFast = theFast;
             if (typeGame == TypeGamePlay.CoTuong || typeGame == TypeGamePlay.CoTuongUp)
-            {
-                timeWaitTurn = theFast? 30_000 : 60_000;
                 boardGame = new ChineseChessBoard();
-            }
-                
+            else if (typeGame == TypeGamePlay.CoVua || typeGame == TypeGamePlay.CoVuaUp)
+                boardGame = new ChessBoard();
 
+            timeWaitTurn = theFast ? 30_000 : 60_000;
             isRunning = true;
             tRunning = new Thread(() =>
             {
@@ -72,10 +75,10 @@ namespace ServerCoTuong.CoreGame
                 {
                     try
                     {
-                        update();
                         Thread.Sleep(200);
+                        update();
                     }
-                    catch { }
+                    catch (Exception e){ csLog.logErr(e); }
                 }
             });
             tRunning.IsBackground = true;
@@ -142,7 +145,7 @@ namespace ServerCoTuong.CoreGame
 
         public bool tryLeaveRoom(Player player)
         {
-            if(MainServer.INSTANCE.isDebug)
+            if(MainConfig.isDebug)
                 csLog.logErr($"Player {player.name} leaveRoom");
             if (player == master)
             {
@@ -153,9 +156,9 @@ namespace ServerCoTuong.CoreGame
                 if (member != null)
                 {
                     master = member;
+                    gameStateMaster = new PlayerGameState(master);
                     member = null;
                     gameStateMember = null;
-                    gameStateMaster = new PlayerGameState(master);
                     sendUpdatePlayers();
                 }
                 else
@@ -187,15 +190,18 @@ namespace ServerCoTuong.CoreGame
                 master.leaveRoom();
             if(member != null)
                 member.leaveRoom();
+            master = null;
+            member = null;
             if (!viewers.IsEmpty)
             {
                 var views = viewers.Values.ToArray();
                 foreach ( var view in views)
                 {
-                    view.leaveRoom(true);
+                    view.leaveRoom();
                     view.services.sendLeaveRoom();
                     view.services.sendOKDialog("Người chơi đã rời đi hết");
                 }
+                viewers.Clear();
             }
             status = -1;
             RoomManager.INSTANCE.closeRoom(this);
@@ -256,21 +262,39 @@ namespace ServerCoTuong.CoreGame
             gameStateMaster.player.services.sendUpdateMoney();
             gameStateMember.player.services.sendUpdateMoney();
 
-            if (MainServer.INSTANCE.isDebug)
+            if (MainConfig.isDebug)
                 csLog.logSuccess($"Init boargame. {gameStateMaster.player.name} - {gameStateMaster.isBlack} | {gameStateMember.player.name} - {gameStateMember.isBlack}");
         }
 
-        public void movePiece(Player p, int idPiece, int xNew, int yNew)
+        public void movePiece(Player p, int idPiece, int xNew, int yNew, PieceType typePhongCap)
         {
-            if (MainServer.INSTANCE.isDebug)
+            if (!boardGame.isRunningGame)
+            {
+                p.services.sendToast("Game chưa bắt đầu");
+                return;
+            }
+            if (MainConfig.isDebug)
                 csLog.logWarring($"move Piece: [{idPiece}] {xNew} - {yNew}");
             PlayerGameState state = p.gameState;
             if (state == null)
                 return;
             var piece = state.getPieceAlive(idPiece);
-            if (piece == null || !boardGame.tryMovePiece(piece, xNew, yNew, out var pieceDie))
+            iPieceChess pieceDie = null;
+            if (piece == null)
             {
-                if (MainServer.INSTANCE.isDebug)
+                sendAnimation(p, AnimationType.MOVE_DENIED, idPiece, p);
+                p.services.sendToast("Không tìm thấy quân cờ");
+                //todo send remove piece
+                return;
+            }
+            else if (!boardGame.tryMovePiece(piece, xNew, yNew, typePhongCap, out pieceDie))
+            {
+                sendAnimation(p, AnimationType.MOVE_DENIED, idPiece, p);
+                if (pieceDie == null)
+                    p.services.sendToast("Nước đi không phù hợp");
+                else
+                    p.services.sendToast("Bạn đang bị chiếu tướng");
+                if (MainConfig.isDebug)
                 {
                     csLog.logWarring($"move Piece ({state.player.name}): [{idPiece}] {(piece == null ? "null" : piece.Type.ToString())} b:{state.isBlack} h:{piece?.isHide} {state.curPiece.Length} denied");
                     StringBuilder sb = new StringBuilder();
@@ -278,14 +302,20 @@ namespace ServerCoTuong.CoreGame
                         sb.AppendLine(pp.ToString());
                     }
                     csLog.logWarring($"data pieces: \n"+sb.ToString());
-                    p.services.sendOKDialog("Nước đi không phù hợp");
+                    //p.services.sendOKDialog("Nước đi không phù hợp");
                 }
-
-                sendAnimation(p, AnimationType.MOVE_DENIED, idPiece, p);
                 return;
             }
             
             sendLocationPiece(piece, pieceDie);
+            if(boardGame is ChessBoard cBoard && cBoard.pieceMove.Count > 0)
+            {
+                foreach(var pp in cBoard.pieceMove)
+                {
+                    sendLocationPiece(pp);
+                }
+                cBoard.pieceMove.Clear();
+            }
 
             var king = state.isBlack ? boardGame.KingOther : boardGame.KingBlack;
             if (boardGame.isCheckTargetKing(king))
@@ -307,7 +337,7 @@ namespace ServerCoTuong.CoreGame
 
 
             changeTurn();
-            if (MainServer.INSTANCE.isDebug)
+            if (MainConfig.isDebug)
                 csLog.logSuccess($"move Piece: [{idPiece}] {piece.Type} success");
         }
 
@@ -323,11 +353,27 @@ namespace ServerCoTuong.CoreGame
 
                 if (boardGame.isRunningGame)
                 {
+                    if (!playerInvites.IsEmpty)
+                        playerInvites.Clear();
+
                     if (timeWaitEndGame > timeNow)
                         closeGame();
                     else
                         updateGame();
                 }  
+                else if (timeNow - timeDeleteInvite > 1000 && !playerInvites.IsEmpty)
+                {
+                    timeDeleteInvite = timeNow;
+                    var keysToRemove = new List<int>();
+                    foreach (var kvp in playerInvites)
+                    {
+                        if (timeNow - kvp.Value > MainConfig.timeWaitInvite)
+                            keysToRemove.Add(kvp.Key);
+                    }
+
+                    foreach (var key in keysToRemove)
+                        playerInvites.TryRemove(key, out _);
+                }
             }
             catch (Exception e)
             {
@@ -343,14 +389,12 @@ namespace ServerCoTuong.CoreGame
             // hết giờ suy nghĩ
             else if(timeNow - curStateTurn.timeStartTurn > timeWaitTurn)
             {
-                if(++curStateTurn.countCancel >= 3)
-                    checkEndGame();
-                else
+                if (++curStateTurn.countCancel < 3)
                 {
                     curStateTurn.player.services.sendToast($"Bạn đã bỏ lượt, chỉ còn {MAX_CANCEL_TURN - curStateTurn.countCancel} lượt bỏ nữa trước khi bị xử thua!");
                     changeTurn();
                 }    
-            }   
+            }
 
             checkEndGame();
         }
@@ -397,7 +441,9 @@ namespace ServerCoTuong.CoreGame
         private void checkEndGame()
         {
             long time = Utils.currentTimeMillis();
-            if (gameStateMaster == null || master == null)
+            if (curStateTurn == null)
+                setEndGame(null);
+            else if (gameStateMaster == null || master == null)
                 setEndGame(gameStateMember);
             else if (gameStateMember == null || member == null)
                 setEndGame(gameStateMaster);
@@ -418,25 +464,27 @@ namespace ServerCoTuong.CoreGame
 
         private void setEndGame(PlayerGameState win, PlayerGameState lose = null)
         {
-            if (win == null && lose == null)
-                return;
             if (win == null && lose != null)
             {
                 win = lose;
                 lose = null;
             }   
-            
             if(win != null)
-                sendAnimation(win.player, AnimationType.WIN, win.pieceKing.Id);
-            if(lose != null)
-                sendAnimation(lose.player, AnimationType.LOSE, lose.pieceKing.Id);
+            {
+                if (win != null)
+                    sendAnimation(win.player, AnimationType.WIN, win.pieceKing.Id);
+                if (lose != null)
+                    sendAnimation(lose.player, AnimationType.LOSE, lose.pieceKing.Id);
 
-            double g = gold * 2;
-            int goldWin = (int)(g * (1D - TAX));
-            int gTax = (int)(g * TAX);
+                double g = gold * 2;
+                int goldWin = (int)(g * (1D - TAX));
+                int gTax = (int)(g * TAX);
 
-            win.player.gold += goldWin;
-            win.player.services.sendUpdateMoney();
+                win.player.gold += goldWin;
+                win.player.services.sendUpdateMoney();
+            }
+            
+            
             curStateTurn = null;
             timeWaitEndGame = Utils.currentTimeMillis() + 5_000;
 
@@ -455,10 +503,24 @@ namespace ServerCoTuong.CoreGame
                 gameStateMember.reset();
             sendResetGameBoard();
 
-            if(member.gold < gold)
+            if(member != null && member.gold < gold)
                 member.leaveRoom();
-            if(master.gold < gold) 
+            if(master != null && master.gold < gold) 
                 master.leaveRoom();
+        }
+
+        internal void AcceptJoinRoom(Player p)
+        {
+            if (member != null)
+                p.services.sendToast("Phòng đã đủ người");
+            else if(boardGame.isRunningGame)
+                p.services.sendToast("Phòng đang diễn ra trận đấu");
+            else if(p.room != null && p.room.boardGame.isRunningGame)
+                p.services.sendToast("Bạn không thể rời phòng khi đang có trận đấu diễn ra");
+            else if(!playerInvites.ContainsKey(p.idPlayer))
+                p.services.sendToast("Lời mời đã hết hạn");
+            else
+                tryJoinRoom(p, false);
         }
     }
 }

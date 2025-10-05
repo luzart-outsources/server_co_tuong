@@ -21,6 +21,7 @@ namespace ServerCoTuong.model.iface
 
         bool isRunningGame { get; }
         bool isChessHide { get; }
+        (int x, int y)? enPassantTarget { get; }
         short getNewID();
 
         void reset();
@@ -40,7 +41,7 @@ namespace ServerCoTuong.model.iface
         bool IsValid(int x, int y);
 
         bool tryMovePiece(iPieceChess piece, int xNew, int yNew, out iPieceChess pieceDie);
-        bool tryCanMovePiece(iPieceChess piece, int xNew, int yNew, out iPieceChess pieceDie);
+        bool tryMovePiece(iPieceChess piece, int xNew, int yNew, PieceType typePhongCap, out iPieceChess pieceDie);
 
         bool isCheckTargetKing(iPieceChess piece);
         bool IsCheckMate(bool isBlack);

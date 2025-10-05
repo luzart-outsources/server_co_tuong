@@ -41,21 +41,21 @@ namespace ServerCoTuong.model.co_tuong
 
             switch (type)
             {
-                case PieceType.ROOK:
-                case PieceType.CANNON:
+                case PieceType.CHINESE_ROOK:
+                case PieceType.CHINESE_CANNON:
                     if (attacker.x == king.x || attacker.y == king.y)
                         foreach (var s in RaySquaresBetween(attacker.x, attacker.y, king.x, king.y))
                             yield return s;
                     break;
 
-                case PieceType.HORSE:
+                case PieceType.CHINESE_HORSE:
                     if (Math.Abs(dx) == 2 && Math.Abs(dy) == 1)
                         yield return (attacker.x + dx / 2, attacker.y);
                     else if (Math.Abs(dx) == 1 && Math.Abs(dy) == 2)
                         yield return (attacker.x, attacker.y + dy / 2);
                     break;
 
-                case PieceType.ELEPHANT:
+                case PieceType.CHINESE_ELEPHANT:
                     if (Math.Abs(dx) == 2 && Math.Abs(dy) == 2)
                         yield return (attacker.x + dx / 2, attacker.y + dy / 2);
                     break;

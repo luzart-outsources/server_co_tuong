@@ -10,12 +10,14 @@ namespace ServerCoTuong.DAO
     public class DAOManager
     {
         public SQL dbServer;
+        public SQL dbFriend;
         private static DAOManager _instance;
         public static DAOManager INTANCE { get { return _instance ?? (_instance = new DAOManager()); } }
 
         public DAOManager()
         {
             dbServer = new SQL(ConfigDB.ConfDVServer.DBHost, ConfigDB.ConfDVServer.DBPort, ConfigDB.ConfDVServer.DBName, ConfigDB.ConfDVServer.userName, ConfigDB.ConfDVServer.Password);
+            dbFriend = new SQL(ConfigDB.ConfDVServer.DBHost, ConfigDB.ConfDVServer.DBPort, ConfigDB.ConfDVServer.DBName, ConfigDB.ConfDVServer.userName, ConfigDB.ConfDVServer.Password, 200);
         }
     }
 }
