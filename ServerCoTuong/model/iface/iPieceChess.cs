@@ -17,10 +17,12 @@ namespace ServerCoTuong.model.iface
         short y { get; }
         bool isAlive { get; set; }
         bool isHide { get; set; }
+        bool firtMove { get; }
 
         bool canMove(int x, int y);
         void moveTo(int x, int y);
         PieceType GetPieceTypeFromPosition();
+        
     }
     
 }

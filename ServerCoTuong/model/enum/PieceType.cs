@@ -12,34 +12,69 @@ namespace ServerCoTuong.model.@enum
         /// Quân ẩn
         /// </summary>
         NONE = -1,
-        //cờ tướng
+
+        #region Cờ Tướng
         /// <summary>
         /// Quân xe
         /// </summary>
-        ROOK = 0,     // Xe
+        CHINESE_ROOK = 0,     // Xe
         /// <summary>
         /// Quân Mã
         /// </summary>
-        HORSE = 1,    // Mã
+        CHINESE_HORSE = 1,    // Mã
         /// <summary>
         /// Quân Pháo
         /// </summary>
-        CANNON = 2,   // Pháo
+        CHINESE_CANNON = 2,   // Pháo
         /// <summary>
         /// Quân Tượng
         /// </summary>
-        ELEPHANT = 3, // Tượng
+        CHINESE_ELEPHANT = 3, // Tượng
         /// <summary>
         /// Quân Sĩ
         /// </summary>
-        ADVISOR = 4,  // Sĩ
+        CHINESE_ADVISOR = 4,  // Sĩ
         /// <summary>
         /// Quân Tướng
         /// </summary>
-        KING = 5,     // Tướng
+        CHINESE_KING = 5,     // Tướng
         /// <summary>
-        /// Quân tốt
+        /// Quân Tốt
         /// </summary>
-        PAWN = 6      // Tốt
+        CHINESE_PAWN = 6,      // Tốt
+        #endregion Cờ Tướng
+
+        #region Cờ Vua
+        /// <summary>
+        /// Quân Tốt
+        /// </summary>
+        CHESS_PAWN = 10,
+        /// <summary>
+        /// Quân Mã
+        /// </summary>
+        CHESS_HORSE = 11,
+        /// <summary>
+        /// Quân Tịnh
+        /// </summary>
+        CHESS_ELEPHANT = 12,
+
+        /// <summary>
+        /// Hack nhỏ để switch-case queen tiếp tục nhánh bishop
+        /// </summary>
+        __internal_BISHOP_ALIAS = 999, 
+        /// <summary>
+        /// Quân Xe
+        /// </summary>
+        CHESS_ROOK = 13,
+        /// <summary>
+        /// Quân Hậu
+        /// </summary>
+        CHESS_QUEEN = 14,
+        /// <summary>
+        /// Quân Tướng
+        /// </summary>
+        CHESS_KING = 15,
+        #endregion Cờ Vua
+
     }
 }

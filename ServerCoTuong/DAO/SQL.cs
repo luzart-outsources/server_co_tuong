@@ -10,7 +10,7 @@ namespace ServerCoTuong.DAO
     public class SQL
     {
         private MySqlConnectionStringBuilder _stringConnect;
-        public SQL(string Host, int port, string Name, string user, string pass)
+        public SQL(string Host, int port, string Name, string user, string pass, int maxPool = 100)
         {
             _stringConnect = new MySqlConnectionStringBuilder();
             _stringConnect["Server"] = Host;
@@ -21,7 +21,7 @@ namespace ServerCoTuong.DAO
             _stringConnect["Connection Timeout"] = "300"; // Set the timeout value in seconds
             _stringConnect["Pooling"] = true;
             _stringConnect["MinPoolSize"] = 0;
-            _stringConnect["MaxPoolSize"] = 100;
+            _stringConnect["MaxPoolSize"] = maxPool;
             _stringConnect["Database"] = Name;
         }
 

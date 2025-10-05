@@ -20,7 +20,7 @@ namespace ServerCoTuong.model
         public byte countCancel;
         public iBoard boardGame { get; private set; }
         public iPieceChess[] curPiece => boardGame == null ? null : isBlack ? boardGame.pieBlack : boardGame.pieOther;
-        public iPieceChess pieceKing => pieceKing == null ? null : isBlack ? boardGame.KingBlack : boardGame.KingOther;
+        public iPieceChess pieceKing => boardGame == null ? null : isBlack ? boardGame.KingBlack : boardGame.KingOther;
 
         public void reset()
         {

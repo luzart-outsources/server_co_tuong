@@ -24,13 +24,9 @@ namespace ServerCoTuong.Server
 
         public TcpServerHandler TcpHandler;
         public WebSocketServer WsHandler;
-        public ConcurrentDictionary<int, Session> SessionEntrys;
-        public bool isDebug = true;
-
-
+        
         public MainServer()
         {
-            SessionEntrys = new ConcurrentDictionary<int, Session>();
         }
 
         public void startServer()
@@ -44,7 +40,7 @@ namespace ServerCoTuong.Server
             if (newSession.IsConnected)
             {
                 var s = new Session(getNewIdSession, newSession);
-                if(SessionEntrys.TryAdd(s.id, s))
+                if(SessionManager.INSTANCE.SessionEntrys.TryAdd(s.id, s))
                 {
                     csLog.logSuccess("New session: " + s.id);
                     s.start();
@@ -56,21 +52,5 @@ namespace ServerCoTuong.Server
                 newSession.Disconnect();
         }
 
-        public void sendMessageAny(Message msg, Session sAction = null)
-        {
-            try
-            {
-                var ds = SessionEntrys.Values;
-                foreach(var s in ds)
-                {
-                    if(s != null && s != sAction)
-                        s.sendMessage(msg);
-                }
-            }
-            catch(Exception e)
-            {
-
-            }
-        }
     }
 }
