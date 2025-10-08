@@ -2,6 +2,8 @@
 using ServerCoTuong.CoreGame;
 using ServerCoTuong.DAO.Clienrs;
 using ServerCoTuong.friend;
+using ServerCoTuong.Helps;
+using ServerCoTuong.loggers;
 using ServerCoTuong.model.@enum;
 using ServerCoTuong.Server;
 using ServerCoTuong.services;
@@ -55,7 +57,7 @@ namespace ServerCoTuong.Clients
                     handler.servives.doOpenSenceMain();
                     handler.servives.sendMainChar();
                     if (acc.player != null)
-                        FriendService.INSTANCE.GetFriendsAsync(acc.player).Start();
+                        _ = FriendService.INSTANCE.GetFriendsAsync(acc.player);
                 }
             }
             else
@@ -82,8 +84,8 @@ namespace ServerCoTuong.Clients
 
         internal void Register(Message msg)
         {
-            services.sendDialogOpenUrl("Thông báo", "Chỉ có thể đăng ký trên web, bạn có muốn chuyển hướng không?", MainConfig.UrlRegister);
-            return;
+            //services.sendDialogOpenUrl("Thông báo", "Chỉ có thể đăng ký trên web, bạn có muốn chuyển hướng không?", MainConfig.UrlRegister);
+            //return;
             var user = msg.Reader.readString();
             var sdt = msg.Reader.readString();
             var pass = msg.Reader.readString();
@@ -111,6 +113,8 @@ namespace ServerCoTuong.Clients
             }    
 
             var b = msg.Reader.readByte();
+            if (MainConfig.isDebug)
+                csLog.logWarring($"receive ({msg.Command}): {b}");
             if (b == 0)//tìm phòng
             {
                 int gamePlay = msg.Reader.readByte();
@@ -119,8 +123,16 @@ namespace ServerCoTuong.Clients
             }
             else if(b == 1)//tạo bàn
             {
+                var type = msg.Reader.readByte();
+                if(!Utils.IsValidEnumValue<TypeGamePlay>(type))
+                {
+                    player.services.sendOKDialog($"Loại bàn cờ không tồn tại.");
+                    if (MainConfig.isDebug)
+                        csLog.Log($"\t Create room denied: {type}");
+                    return;
+                }    
                 RoomManager.INSTANCE.createRoom(session, 
-                    (TypeGamePlay)msg.Reader.readByte(), //loại game 0 cờ tướng, 1 cờ tướng úp, 2 cờ vua, 3 cờ vua up
+                    (TypeGamePlay)type, //loại game 0 cờ tướng, 1 cờ tướng úp, 2 cờ vua, 3 cờ vua up
                     msg.Reader.readInt(), //gold
                     msg.Reader.readBool());//cờ nhanh?
             }
@@ -131,8 +143,10 @@ namespace ServerCoTuong.Clients
                 var room = RoomManager.INSTANCE.getRoomByID(idRoom);
                 if (room == null)
                     session.services.sendOKDialog("Không tìm thấy phòng!");
-                else if (room.tryJoinRoom(session.player, isViewer))
-                    room.sendUpdatePlayers();
+                else
+                    room.joinRoom(session.player, isViewer);
+                //if (room.tryJoinRoom(session.player, isViewer))
+                    
             }
             else if(b == 3)
             {
@@ -199,6 +213,9 @@ namespace ServerCoTuong.Clients
                 case 1:
                     player.room.movePiece(player, msg.Reader.readShort(), msg.Reader.readShort(), msg.Reader.readShort(), (PieceType)msg.Reader.readSByte());
                     break;
+                case 2:
+                    player.room.requestEndGame(player, msg.Reader.readByte());
+                    break;
             }
         }
 
@@ -251,16 +268,19 @@ namespace ServerCoTuong.Clients
             switch (b)
             {
                 case 0:
-                    FriendService.INSTANCE.SendRequestAsync(player, idPlayerTo).Start();
+                    _ = FriendService.INSTANCE.SendRequestAsync(player, idPlayerTo);
                     break;
                 case 1:
-                    FriendService.INSTANCE.AcceptAsync(player, idPlayerTo).Start();
+                    _ = FriendService.INSTANCE.AcceptAsync(player, idPlayerTo);
                     break;
                 case 2:
-                    FriendService.INSTANCE.RejectAsync(player, idPlayerTo).Start();
+                    _ = FriendService.INSTANCE.RejectAsync(player, idPlayerTo);
                     break;
                 case 3:
-                    FriendService.INSTANCE.UnfriendAsync(player, idPlayerTo).Start();
+                    _ = FriendService.INSTANCE.UnfriendAsync(player, idPlayerTo);
+                    break;
+                case 4:
+                    player.services.sendFriends();
                     break;
             }
         }
@@ -270,6 +290,9 @@ namespace ServerCoTuong.Clients
             var b = msg.Reader.readByte();
             switch (b)
             {
+                case 5:
+                    DialogService.INSTANCE.requestActionYesNo(player, msg.Reader.readShort(), msg.Reader.readInt(), msg.Reader.readBool());
+                    break;
                 case 7:
                     NotifyService.INSTANCE.requestActionYesNo(player, msg.Reader.readShort(), msg.Reader.readInt(), msg.Reader.readBool());
                     break;

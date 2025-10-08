@@ -11,7 +11,7 @@ namespace ServerCoTuong.DAO
     {
         public static ConfigDB ConfDVServer = new ConfigDB()
         {
-            DBHost = "127.0.0.1",
+            DBHost = "103.82.39.169",
             DBPort = 3306,
             DBName = "gamecotuong",
             userName = "chees",

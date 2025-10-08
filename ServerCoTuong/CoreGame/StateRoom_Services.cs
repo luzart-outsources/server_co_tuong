@@ -1,7 +1,9 @@
-﻿using NetworkClient.Models;
+﻿using MySqlX.XDevAPI;
+using NetworkClient.Models;
 using ServerCoTuong.Clients;
 using ServerCoTuong.Helps;
 using ServerCoTuong.loggers;
+using ServerCoTuong.model;
 using ServerCoTuong.model.@enum;
 using ServerCoTuong.model.iface;
 using ServerCoTuong.Server;
@@ -148,7 +150,10 @@ namespace ServerCoTuong.CoreGame
                     msg.Writer.writeShort(i.y);
                 }
 
-                sendMessForAny(msg, pOnly);
+                if(pOnly != null)
+                    pOnly.session.sendMessage(msg);
+                else
+                    sendMessForAny(msg);
             }
             catch (Exception e) { }
         }
@@ -268,6 +273,39 @@ namespace ServerCoTuong.CoreGame
                 NotifyService.INSTANCE.PushYesNo(player, TypeNotifyYesNo.InviteRoom, this.id, $"{player.name} mời bạn vào phòng", false);
                 player.services.sendToast($"Đã gửi lời mời đến {nameP}");
             }    
+        }
+
+        private void sendTimeWaitAccept(PlayerGameState state)
+        {
+            if (state == null || state.player == null || state.isReady)
+                return;
+            long time = Utils.currentTimeMillis();
+            var msg = new Message(11);
+            msg.Writer.writeByte(6);
+            msg.Writer.writeInt(state.player.idSession);
+            msg.Writer.writeInt((int)(state.timeWaitAccept - time)); //ms
+            state.player.session.sendMessage(msg);
+        }
+        private void sendTextWaiting(Player p, string textWait)
+        {
+            if(p == null)
+                return;
+            long time = Utils.currentTimeMillis();
+            var msg = new Message(11);
+            msg.Writer.writeByte(7);
+            msg.Writer.writeString(textWait);
+            p.session.sendMessage(msg);
+        }
+
+        private void sendToast(string text, Player pOnly = null)
+        {
+            var msg = new Message(3);
+            msg.Writer.writeByte(2);
+            msg.Writer.writeString(text);
+            if(pOnly != null)
+                pOnly.session.sendMessage(msg);
+            else
+                sendMessForAny(msg);
         }
     }
 }

@@ -102,6 +102,7 @@
     <Compile Include="Clients\Player.cs" />
     <Compile Include="Clients\ReadMessage.cs" />
     <Compile Include="Clients\Session.cs" />
+    <Compile Include="Clients\TypeDialogYesNo.cs" />
     <Compile Include="Clients\TypeNotifyYesNo.cs" />
     <Compile Include="CoreGame\RoomManager.cs" />
     <Compile Include="CoreGame\StateRoom_Services.cs" />
@@ -135,6 +136,7 @@
     <Compile Include="Server\MainConfig.cs" />
     <Compile Include="Server\MainServer.cs" />
     <Compile Include="Server\SessionManager.cs" />
+    <Compile Include="services\DialogService.cs" />
     <Compile Include="services\iface\INotifyService.cs" />
     <Compile Include="services\NotifyService.cs" />
   </ItemGroup>

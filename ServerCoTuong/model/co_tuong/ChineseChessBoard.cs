@@ -240,6 +240,13 @@ namespace ServerCoTuong.model.co_tuong
             bool success = tryCanMovePiece(piece, xNew, yNew, out pieceDie);
             if (success)
             {
+                var king = piece.IsBlack ? KingBlack : KingOther;
+                if (piece != king && isSquareAttacked(king.x, king.y, !piece.IsBlack))
+                {
+                    pieceDie = king;
+                    return false;
+                }
+
                 grid[piece.y, piece.x] = null;
                 setAt(xNew, yNew, piece);
                 if (pieceDie != null)
@@ -275,7 +282,7 @@ namespace ServerCoTuong.model.co_tuong
                     {
                         int step = dy > 0 ? 1 : -1;
                         int count = 0;
-                        for (int y = piece.y + step; y != yNew; y += step)
+                        for (int y = piece.y + step; y != yNew && y >= 0 && y < getRow(); y += step)
                         {
                             if (grid[y, piece.x] != null) count++;
                         }
@@ -326,12 +333,6 @@ namespace ServerCoTuong.model.co_tuong
             }
             if (IsKingFaceToFace(piece, xNew, yNew))
                 return false;
-            var king = piece.IsBlack ? KingBlack : KingOther;
-            if (piece != king && isSquareAttacked(king.x, king.y, !piece.IsBlack))
-            {
-                pieceDie = king;
-                return false;
-            }    
 
             // 3. Xử lý ăn quân
             iPieceChess target = grid[yNew, xNew];

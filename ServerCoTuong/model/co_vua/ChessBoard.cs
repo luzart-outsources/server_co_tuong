@@ -125,25 +125,34 @@ namespace ServerCoTuong.model.co_vua
 
             if (isRandom)
             {
-                // Danh sách quân (trừ King)
-                List<PieceType> backRank = new List<PieceType>()
+                List<PieceType> redPieces = new List<PieceType>()
                 {
                     PieceType.CHESS_ROOK, PieceType.CHESS_HORSE, PieceType.CHESS_ELEPHANT,
-                    PieceType.CHESS_QUEEN, PieceType.CHESS_ELEPHANT, PieceType.CHESS_HORSE, PieceType.CHESS_ROOK
+                    PieceType.CHESS_QUEEN, PieceType.CHESS_ELEPHANT, PieceType.CHESS_HORSE, PieceType.CHESS_ROOK,
+                    PieceType.CHESS_PAWN,PieceType.CHESS_PAWN,PieceType.CHESS_PAWN,PieceType.CHESS_PAWN,PieceType.CHESS_PAWN,PieceType.CHESS_PAWN,PieceType.CHESS_PAWN,PieceType.CHESS_PAWN
                 };
 
-                Utils.Shuffle(backRank);
+                List<PieceType> blackPieces = new List<PieceType>()
+                {
+                    PieceType.CHESS_ROOK, PieceType.CHESS_HORSE, PieceType.CHESS_ELEPHANT,
+                    PieceType.CHESS_QUEEN, PieceType.CHESS_ELEPHANT, PieceType.CHESS_HORSE, PieceType.CHESS_ROOK,
+                    PieceType.CHESS_PAWN,PieceType.CHESS_PAWN,PieceType.CHESS_PAWN,PieceType.CHESS_PAWN,PieceType.CHESS_PAWN,PieceType.CHESS_PAWN,PieceType.CHESS_PAWN,PieceType.CHESS_PAWN
+                };
 
-                // --- Quân Trắng (Other) ---
+                Utils.Shuffle(redPieces);
+                Utils.Shuffle(blackPieces);
+
+                Queue<PieceType> redQ = new Queue<PieceType>(redPieces);
+                Queue<PieceType> blackQ = new Queue<PieceType>(blackPieces);
+
+                /// đội trắng
                 pieOther = new iPieceChess[16];
                 int idx = 0;
-
                 // Hàng 7 (back rank, ẩn)
                 for (int x = 0; x < 8; x++)
                 {
                     if (x == 4) continue; // để dành ô cho King
-                    pieOther[idx++] = create(backRank[0], false, x, 7, true);
-                    backRank.RemoveAt(0);
+                    pieOther[idx++] = create(redQ.Dequeue(), false, x, 7, true);
                 }
                 // Đặt King trắng mở
                 pieOther[idx++] = create(PieceType.CHESS_KING, false, 4, 7, false);
@@ -151,17 +160,10 @@ namespace ServerCoTuong.model.co_vua
                 // Hàng 6 (pawns ẩn)
                 for (int x = 0; x < 8; x++)
                 {
-                    pieOther[idx++] = create(PieceType.CHESS_PAWN, false, x, 6, true);
+                    pieOther[idx++] = create(redQ.Dequeue(), false, x, 6, true);
                 }
 
-                // --- Quân Đen (Black) ---
-                backRank = new List<PieceType>()
-                {
-                    PieceType.CHESS_ROOK, PieceType.CHESS_HORSE, PieceType.CHESS_ELEPHANT,
-                    PieceType.CHESS_QUEEN, PieceType.CHESS_ELEPHANT, PieceType.CHESS_HORSE, PieceType.CHESS_ROOK
-                };
-                Utils.Shuffle(backRank);
-
+                /// đội đen
                 pieBlack = new iPieceChess[16];
                 idx = 0;
 
@@ -169,8 +171,7 @@ namespace ServerCoTuong.model.co_vua
                 for (int x = 0; x < 8; x++)
                 {
                     if (x == 4) continue;
-                    pieBlack[idx++] = create(backRank[0], true, x, 0, true);
-                    backRank.RemoveAt(0);
+                    pieBlack[idx++] = create(blackQ.Dequeue(), true, x, 0, true);
                 }
                 // Đặt King đen mở
                 pieBlack[idx++] = create(PieceType.CHESS_KING, true, 4, 0, false);
@@ -178,8 +179,67 @@ namespace ServerCoTuong.model.co_vua
                 // Hàng 1 (pawns ẩn)
                 for (int x = 0; x < 8; x++)
                 {
-                    pieBlack[idx++] = create(PieceType.CHESS_PAWN, true, x, 1, true);
+                    pieBlack[idx++] = create(blackQ.Dequeue(), true, x, 1, true);
                 }
+
+
+
+
+                //// Danh sách quân (trừ King)
+                //List<PieceType> backRank = new List<PieceType>()
+                //{
+                //    PieceType.CHESS_ROOK, PieceType.CHESS_HORSE, PieceType.CHESS_ELEPHANT,
+                //    PieceType.CHESS_QUEEN, PieceType.CHESS_ELEPHANT, PieceType.CHESS_HORSE, PieceType.CHESS_ROOK
+                //};
+
+                //Utils.Shuffle(backRank);
+
+                //// --- Quân Trắng (Other) ---
+                //pieOther = new iPieceChess[16];
+                //int idx = 0;
+
+                //// Hàng 7 (back rank, ẩn)
+                //for (int x = 0; x < 8; x++)
+                //{
+                //    if (x == 4) continue; // để dành ô cho King
+                //    pieOther[idx++] = create(backRank[0], false, x, 7, true);
+                //    backRank.RemoveAt(0);
+                //}
+                //// Đặt King trắng mở
+                //pieOther[idx++] = create(PieceType.CHESS_KING, false, 4, 7, false);
+
+                //// Hàng 6 (pawns ẩn)
+                //for (int x = 0; x < 8; x++)
+                //{
+                //    pieOther[idx++] = create(PieceType.CHESS_PAWN, false, x, 6, true);
+                //}
+
+                //// --- Quân Đen (Black) ---
+                //backRank = new List<PieceType>()
+                //{
+                //    PieceType.CHESS_ROOK, PieceType.CHESS_HORSE, PieceType.CHESS_ELEPHANT,
+                //    PieceType.CHESS_QUEEN, PieceType.CHESS_ELEPHANT, PieceType.CHESS_HORSE, PieceType.CHESS_ROOK
+                //};
+                //Utils.Shuffle(backRank);
+
+                //pieBlack = new iPieceChess[16];
+                //idx = 0;
+
+                //// Hàng 0 (back rank, ẩn)
+                //for (int x = 0; x < 8; x++)
+                //{
+                //    if (x == 4) continue;
+                //    pieBlack[idx++] = create(backRank[0], true, x, 0, true);
+                //    backRank.RemoveAt(0);
+                //}
+                //// Đặt King đen mở
+                //pieBlack[idx++] = create(PieceType.CHESS_KING, true, 4, 0, false);
+
+                //// Hàng 1 (pawns ẩn)
+                //for (int x = 0; x < 8; x++)
+                //{
+                //    pieBlack[idx++] = create(PieceType.CHESS_PAWN, true, x, 1, true);
+                //}
             }
             else
             {
@@ -250,6 +310,12 @@ namespace ServerCoTuong.model.co_vua
             bool success = tryCanMovePiece(piece, xNew, yNew, out pieceDie, out var pieceMove2);
             if (success)
             {
+                var king = piece.IsBlack ? KingBlack : KingOther;
+                if (piece != king && isSquareAttacked(king.x, king.y, !piece.IsBlack))
+                {
+                    pieceDie = king;
+                    return false;
+                }
                 if (piece.Type == PieceType.CHESS_PAWN && Math.Abs(yNew - piece.y) == 2)
                 {
                     // Ghi lại ô mà đối phương có thể ăn en passant
@@ -429,12 +495,7 @@ namespace ServerCoTuong.model.co_vua
                     }
                     break;
             }
-            var king = piece.IsBlack ? KingBlack : KingOther;
-            if (piece != king && isSquareAttacked(king.x, king.y, !piece.IsBlack))
-            {
-                pieceDie = king;
-                return false;
-            }
+            
                 
 
             // 2. Ăn quân

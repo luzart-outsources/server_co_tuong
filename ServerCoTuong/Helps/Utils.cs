@@ -138,6 +138,11 @@ namespace ServerCoTuong.Helps
         {
             return value.ToString("N0");
         }
+
+        public static bool IsValidEnumValue<T>(int value) where T : Enum
+        {
+            return Enum.IsDefined(typeof(T), value);
+        }
     }
 
 }

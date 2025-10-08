@@ -214,7 +214,7 @@ namespace ServerCoTuong.friend
                 return;
             var friends = await repo.GetFriendsAsync(p.idPlayer);
             if(friends == null || friends.Count < 1) return;
-
+            p.friens.Clear();
             foreach (var fr in friends)
             {
                 p.friens.TryAdd(fr.PlayerId, fr);

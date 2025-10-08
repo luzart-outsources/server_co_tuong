@@ -17,10 +17,12 @@ namespace ServerCoTuong.model
         public bool isBlack;
         public long timeStartTurn;
         public long timeEndGame;
+        public long timeWaitAccept { get; private set; }
         public byte countCancel;
         public iBoard boardGame { get; private set; }
         public iPieceChess[] curPiece => boardGame == null ? null : isBlack ? boardGame.pieBlack : boardGame.pieOther;
         public iPieceChess pieceKing => boardGame == null ? null : isBlack ? boardGame.KingBlack : boardGame.KingOther;
+        public bool isCauHoa;
 
         public void reset()
         {
@@ -30,6 +32,8 @@ namespace ServerCoTuong.model
             timeEndGame = 0;
             countCancel = 0;
             boardGame = null;
+            isCauHoa = false;
+            timeWaitAccept = Utils.currentTimeMillis() + 10_300;
         }
 
         public PlayerGameState(Player player)
