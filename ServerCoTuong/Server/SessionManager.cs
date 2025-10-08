@@ -19,6 +19,7 @@ namespace ServerCoTuong.Server
         public SessionManager()
         {
             SessionEntrys = new ConcurrentDictionary<int, Session>();
+            PlayerEntrys = new ConcurrentDictionary<int, Player>();
         }
 
         public void sendMessageAny(Message msg, Session sAction = null)

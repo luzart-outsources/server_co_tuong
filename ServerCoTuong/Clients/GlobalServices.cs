@@ -97,6 +97,25 @@ namespace ServerCoTuong.Clients
             }
         }
 
+        internal void sendOKDialogYesNo(string tile, string text, TypeDialogYesNo typeDialog, int id)
+        {
+            try
+            {
+                var msg = new Message(3);
+                msg.Writer.writeByte(5);
+                msg.Writer.writeString(tile);//tile thông báo
+                msg.Writer.writeString(text);//nội dung
+                msg.Writer.writeShort((short)typeDialog);//type dialog, để gửi lên server khi nhấn yes/no
+                msg.Writer.writeInt(id);//id của dialog để gửi lên server
+                session.sendMessage(msg);
+            }
+            catch (Exception e)
+            {
+
+            }
+        }
+
+
         public void sendToast(string text)
         {
             try

@@ -1,4 +1,5 @@
 ﻿using ServerCoTuong.Clients;
+using ServerCoTuong.friend;
 using ServerCoTuong.Helps;
 using ServerCoTuong.loggers;
 using ServerCoTuong.Server;
@@ -68,6 +69,12 @@ namespace ServerCoTuong.CoreGame
                 s.player.services.sendOKDialog($"Bạn không đủ {Utils.formatNumber(gold)} gold.");
                 return;
             }
+            if (!Enum.IsDefined(typeof(TypeGamePlay), gameplay))
+            {
+                s.player.services.sendOKDialog($"Loại bàn cờ không hợp lệ.");
+                return;
+            }
+
             StateRoom room = new StateRoom(s.player, gameplay, gold, theFast);
             if(roomEntrys.TryAdd(room.id, room))
             {

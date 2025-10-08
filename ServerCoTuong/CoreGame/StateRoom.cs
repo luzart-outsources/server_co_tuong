@@ -10,11 +10,13 @@ using ServerCoTuong.model.co_vua;
 using ServerCoTuong.model.@enum;
 using ServerCoTuong.model.iface;
 using ServerCoTuong.Server;
+using ServerCoTuong.services;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Numerics;
 using System.Text;
 using System.Threading;
@@ -88,6 +90,18 @@ namespace ServerCoTuong.CoreGame
         public byte countPlayer => (byte)((master == null ? 0 : 1) + (member == null ? 0 : 1));
         public int countViewer => viewers.Count;
 
+        public void joinRoom(Player pl, bool joinViewer)
+        {
+            if(tryJoinRoom(pl, joinViewer))
+            {
+                sendUpdatePlayers();
+                if (member == pl)
+                {
+                    sendTextWaiting(master, "Đang chờ đối phương sẵn sàng");
+                    sendTimeWaitAccept(gameStateMember);
+                }   
+            }
+        }
         /// <summary>
         /// Vào bàn, <br/>
         /// typeJoin: <br/>
@@ -100,8 +114,8 @@ namespace ServerCoTuong.CoreGame
         {
             if (status == -1 || !isRunning)
                 pl.services.sendOKDialog("Bàn này đã đóng!");
-            else if(boardGame.isRunningGame || timeWaitEndGame > timeNow)
-                pl.services.sendOKDialog("Bàn này đang trong trận!");
+            else if(!joinViewer && (boardGame.isRunningGame || timeWaitEndGame > timeNow))
+                pl.services.sendOKDialog("Bàn này đang diễn ra trận đấu!");
             else if (!joinViewer)
             {
                 if (pl.gold < gold)
@@ -127,6 +141,7 @@ namespace ServerCoTuong.CoreGame
 
                 pl.joinRoom(this);
                 sendOpenRoom(pl, false);
+                
                 return true;
             } 
             else if(joinViewer && !viewers.ContainsKey(pl.idSession) && viewers.TryAdd(pl.idSession, pl))
@@ -160,6 +175,11 @@ namespace ServerCoTuong.CoreGame
                     member = null;
                     gameStateMember = null;
                     sendUpdatePlayers();
+                    if (!boardGame.isRunningGame)
+                    {
+                        gameStateMaster.isReady = false;
+                        sendAcceptPlay(master, false);
+                    }
                 }
                 else
                 {
@@ -173,6 +193,11 @@ namespace ServerCoTuong.CoreGame
                 member = null;
                 gameStateMember = null;
                 sendUpdatePlayers();
+                if (!boardGame.isRunningGame && gameStateMaster.isReady)
+                {
+                    gameStateMaster.isReady = false;
+                    sendAcceptPlay(master, false);
+                }
             }
             else if (viewers.ContainsKey(player.idSession) && viewers.TryRemove(player.idSession, out var _))
                 sendUpdateViewer();
@@ -214,9 +239,24 @@ namespace ServerCoTuong.CoreGame
             if (player.gold < gold)
                 player.services.sendOKDialog($"Bạn không đủ {Utils.formatNumber(gold)} gold.");
             if (player == master)
+            {
+                if(gameStateMember == null || !gameStateMember.isReady)
+                {
+                    player.services.sendToast("Hãy chờ khách sẵn sàng nhé");
+                    return;
+                }
                 gameStateMaster.isReady = isReady;
+            }    
             else if (player == member)
+            {
+                if(gameStateMaster != null)
+                {
+                    gameStateMaster.reset();
+                    sendTimeWaitAccept(gameStateMaster);
+                    sendTextWaiting(member, "Đang chờ đối phương sẵn sàng");
+                }
                 gameStateMember.isReady = isReady;
+            }
             else
                 return;
 
@@ -273,6 +313,11 @@ namespace ServerCoTuong.CoreGame
                 p.services.sendToast("Game chưa bắt đầu");
                 return;
             }
+            if(timeWaitEndGame > 0)
+            {
+                p.services.sendToast("Trò chơi đã kết thúc, đang xử lý dữ liệu");
+                return;
+            }
             if (MainConfig.isDebug)
                 csLog.logWarring($"move Piece: [{idPiece}] {xNew} - {yNew}");
             PlayerGameState state = p.gameState;
@@ -326,12 +371,26 @@ namespace ServerCoTuong.CoreGame
                         setEndGame(gameStateMaster, gameStateMember);
                     else if (gameStateMember == state)
                         setEndGame(gameStateMember, gameStateMaster);
+                    else
+                    {
+                        p.services.sendToast("State không phù hợp");
+                        csLog.logErr("State not found: "+state);
+                    }
                 }
                 else
                     sendAnimation(p, AnimationType.TAGET_KING, king.Id);
             }
-            if(pieceDie != null)
+            if(pieceDie != null && pieceDie == king)
             {
+                if (gameStateMaster == state)
+                    setEndGame(gameStateMaster, gameStateMember);
+                else if (gameStateMember == state)
+                    setEndGame(gameStateMember, gameStateMaster);
+                else
+                {
+                    p.services.sendToast("State không phù hợp");
+                    csLog.logErr("State not found: " + state);
+                }
                 //todo random chat khi ăn quân địch
             }
 
@@ -356,7 +415,7 @@ namespace ServerCoTuong.CoreGame
                     if (!playerInvites.IsEmpty)
                         playerInvites.Clear();
 
-                    if (timeWaitEndGame > timeNow)
+                    if (timeWaitEndGame > 0 && timeWaitEndGame < timeNow)
                         closeGame();
                     else
                         updateGame();
@@ -374,6 +433,27 @@ namespace ServerCoTuong.CoreGame
                     foreach (var key in keysToRemove)
                         playerInvites.TryRemove(key, out _);
                 }
+
+                if (!boardGame.isRunningGame)
+                {
+                    if(gameStateMember != null && !gameStateMember.isReady && timeNow > gameStateMember.timeWaitAccept)
+                    {
+                        var Player = gameStateMember.player;
+                        gameStateMember.player.leaveRoom();
+                        Player.services.sendToast("Bạn bị đuổi khỏi phòng vì không sẵn sàng");
+                    }  
+                    else if(gameStateMember != null && gameStateMember.isReady && gameStateMaster != null && !gameStateMaster.isReady && timeNow > gameStateMaster.timeWaitAccept)
+                    {
+                        var Player = gameStateMaster.player;
+                        gameStateMaster.player.leaveRoom();
+                        Player.services.sendToast("Bạn bị đuổi khỏi phòng vì không sẵn sàng");
+                    }
+                }
+
+                if(member != null && (member.session == null || !member.session.isConnectTCP))
+                    tryLeaveRoom(member);
+                else if (master != null && (master.session == null || !master.session.isConnectTCP))
+                    tryLeaveRoom(master);
             }
             catch (Exception e)
             {
@@ -383,6 +463,9 @@ namespace ServerCoTuong.CoreGame
 
         private void updateGame()
         {
+            if (timeWaitEndGame > 0)
+                return;
+
             if (curStateTurn == null)
                 changeTurn();
 
@@ -451,6 +534,8 @@ namespace ServerCoTuong.CoreGame
                 checkStateWin();
             else if(curStateTurn.countCancel >= 3)
                 checkStateWin();
+            else if(gameStateMaster.isCauHoa && gameStateMember.isCauHoa)
+                setEndGame(null, null);
 
 
             void checkStateWin()
@@ -483,8 +568,23 @@ namespace ServerCoTuong.CoreGame
                 win.player.gold += goldWin;
                 win.player.services.sendUpdateMoney();
             }
-            
-            
+            else if (gameStateMaster != null && gameStateMember != null && gameStateMaster.isCauHoa && gameStateMember.isCauHoa)
+            {
+                sendAnimation(gameStateMaster.player, AnimationType.HOA, gameStateMaster.pieceKing.Id);
+                sendAnimation(gameStateMember.player, AnimationType.HOA, gameStateMember.pieceKing.Id);
+                if (master != null)
+                {
+                    master.gold += gold;
+                    master.services.sendUpdateMoney();
+                }
+                if (member != null)
+                {
+                    member.gold += gold;
+                    member.services.sendUpdateMoney();
+                }
+            }
+
+
             curStateTurn = null;
             timeWaitEndGame = Utils.currentTimeMillis() + 5_000;
 
@@ -502,25 +602,81 @@ namespace ServerCoTuong.CoreGame
             if(gameStateMember != null) 
                 gameStateMember.reset();
             sendResetGameBoard();
+            if (gameStateMember != null)
+            {
+                sendTimeWaitAccept(gameStateMember);
+                sendTextWaiting(master, "Đang chờ đối phương sẵn sàng");
+            }
 
-            if(member != null && member.gold < gold)
+            if (master != null)
+                sendAcceptPlay(master, gameStateMaster.isReady);
+            if (member != null)
+                sendAcceptPlay(member, gameStateMember.isReady);
+
+            if (member != null && member.gold < gold)
                 member.leaveRoom();
             if(master != null && master.gold < gold) 
                 master.leaveRoom();
+            if (MainConfig.isDebug)
+                csLog.Log("End Game Success...");
+            timeWaitEndGame = 0;
         }
 
         internal void AcceptJoinRoom(Player p)
         {
             if (member != null)
                 p.services.sendToast("Phòng đã đủ người");
-            else if(boardGame.isRunningGame)
+            else if (boardGame.isRunningGame)
                 p.services.sendToast("Phòng đang diễn ra trận đấu");
-            else if(p.room != null && p.room.boardGame.isRunningGame)
+            else if (p.room != null && p.room.boardGame.isRunningGame)
                 p.services.sendToast("Bạn không thể rời phòng khi đang có trận đấu diễn ra");
-            else if(!playerInvites.ContainsKey(p.idPlayer))
+            else if (!playerInvites.ContainsKey(p.idPlayer))
                 p.services.sendToast("Lời mời đã hết hạn");
             else
-                tryJoinRoom(p, false);
+                joinRoom(p, false);
+        }
+
+        /// <summary>
+        /// Cầu hòa, xin thua <br/>
+        /// 0: cầu hòa <br/>
+        /// 1: xin thua
+        /// </summary>
+        /// <param name="p"></param>
+        /// <param name="type"></param>
+        public void requestEndGame(Player p, byte type)
+        {
+            if (p.gameState == null)
+                return;
+            if (type == 0)
+            {
+                p.gameState.isCauHoa = true;
+                if (p == master && member != null)
+                    DialogService.INSTANCE.PushYesNo(member, TypeDialogYesNo.EndGameCauHoa, id, $"{p.name} ngỏ ý cầu hòa với bạn, bạn có đồng ý không?");
+                else if(p == member && master != null)
+                    DialogService.INSTANCE.PushYesNo(member, TypeDialogYesNo.EndGameCauHoa, id, $"{p.name} ngỏ ý cầu hòa với bạn, bạn có đồng ý không?");
+            } 
+            else if(type == 1)
+            {
+                if (p.gameState == gameStateMaster)
+                    setEndGame(gameStateMember, p.gameState);
+                else if(p.gameState == gameStateMember)
+                    setEndGame(gameStateMaster, p.gameState);
+
+                sendToast($"{p.name} Đã đầu hàng");
+            }
+        }
+
+        internal void callbackEndGame(Player p, bool action)
+        {
+            if(p.gameState != null)
+            {
+                if (action)
+                    p.gameState.isCauHoa = true;
+                else if (p == master && member != null)
+                    member.services.sendToast("Đối phương không đồng ý lời cầu hòa của bạn");
+                else if (p == member && master != null)
+                    master.services.sendToast("Đối phương không đồng ý lời cầu hòa của bạn");
+            }
         }
     }
 }

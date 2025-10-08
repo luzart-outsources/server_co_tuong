@@ -12,5 +12,6 @@ namespace ServerCoTuong.model.@enum
         TAGET_KING = 1,  // CHIẾU TƯỚNG
         WIN = 2,         // THẮNG
         LOSE = 3,        // THUA
+        HOA = 4,        // HÒA
     }
 }
