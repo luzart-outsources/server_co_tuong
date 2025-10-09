@@ -526,5 +526,9 @@ namespace ServerCoTuong.model.co_tuong
             return true;
         }
 
+        public (iPieceChess piece, int xNew, int yNew) getBotMove(bool isBlack)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
