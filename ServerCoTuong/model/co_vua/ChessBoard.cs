@@ -965,5 +965,10 @@ namespace ServerCoTuong.model.co_vua
 
             return false;
         }
+
+        public (iPieceChess piece, int xNew, int yNew) getBotMove(bool isBlack)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
