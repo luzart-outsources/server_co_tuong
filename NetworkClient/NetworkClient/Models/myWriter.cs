@@ -45,15 +45,15 @@ namespace NetworkClient.Models
 
 
 
-        public void writeSByte(sbyte value)
+        public void writeSByte(int value)
         {
-            checkLenght(0);
-            buffer[posWrite++] = value;
+            checkLenght(1);
+            buffer[posWrite++] = (sbyte)value;
         }
 
-        public void writeByte(byte value)
+        public void writeByte(int value)
         {
-            writeSByte(NetworkUtils.ByteToSByte(value));
+            writeSByte(NetworkUtils.ByteToSByte((byte)value));
         }
 
         public void writeBool(bool value)
@@ -61,7 +61,7 @@ namespace NetworkClient.Models
             writeSByte((sbyte)(value ? 1 : 0));
         }
 
-        public void writeShort(short value)
+        public void writeShort(int value)
         {
             checkLenght(2);
             for (int num = 1; num >= 0; num--)
