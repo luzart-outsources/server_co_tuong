@@ -240,12 +240,12 @@ namespace ServerCoTuong.model.co_tuong
             bool success = tryCanMovePiece(piece, xNew, yNew, out pieceDie);
             if (success)
             {
-                var king = piece.IsBlack ? KingBlack : KingOther;
-                if (piece != king && isSquareAttacked(king.x, king.y, !piece.IsBlack))
-                {
-                    pieceDie = king;
-                    return false;
-                }
+                //var king = piece.IsBlack ? KingBlack : KingOther;
+                //if (piece != king && isSquareAttacked(king.x, king.y, !piece.IsBlack))
+                //{
+                //    pieceDie = king;
+                //    return false;
+                //}
 
                 grid[piece.y, piece.x] = null;
                 setAt(xNew, yNew, piece);
