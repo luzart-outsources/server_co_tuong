@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerCoTuong", "ServerCoTu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkClient", "..\NetworkClient\NetworkClient\NetworkClient.csproj", "{82791BD2-E154-45E2-97CD-582A4362A509}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientBotGame", "..\ClientBotGame\ClientBotGame.csproj", "{36B78478-AF4E-453A-80C7-6B5B186FD274}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,6 +26,10 @@ Global
 		{82791BD2-E154-45E2-97CD-582A4362A509}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{82791BD2-E154-45E2-97CD-582A4362A509}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{82791BD2-E154-45E2-97CD-582A4362A509}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36B78478-AF4E-453A-80C7-6B5B186FD274}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36B78478-AF4E-453A-80C7-6B5B186FD274}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36B78478-AF4E-453A-80C7-6B5B186FD274}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36B78478-AF4E-453A-80C7-6B5B186FD274}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

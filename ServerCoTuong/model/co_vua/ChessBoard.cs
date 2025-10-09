@@ -310,12 +310,12 @@ namespace ServerCoTuong.model.co_vua
             bool success = tryCanMovePiece(piece, xNew, yNew, out pieceDie, out var pieceMove2);
             if (success)
             {
-                var king = piece.IsBlack ? KingBlack : KingOther;
-                if (piece != king && isSquareAttacked(king.x, king.y, !piece.IsBlack))
-                {
-                    pieceDie = king;
-                    return false;
-                }
+                //var king = piece.IsBlack ? KingBlack : KingOther;
+                //if (piece != king && isSquareAttacked(king.x, king.y, !piece.IsBlack))
+                //{
+                //    pieceDie = king;
+                //    return false;
+                //}
                 if (piece.Type == PieceType.CHESS_PAWN && Math.Abs(yNew - piece.y) == 2)
                 {
                     // Ghi lại ô mà đối phương có thể ăn en passant

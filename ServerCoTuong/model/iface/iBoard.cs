@@ -45,5 +45,10 @@ namespace ServerCoTuong.model.iface
 
         bool isCheckTargetKing(iPieceChess piece);
         bool IsCheckMate(bool isBlack);
+
+        /// <summary>
+        /// Lấy ra quân cờ và vị trí nước đi tiếp theo dùng để check bot
+        /// </summary>
+        (iPieceChess piece, int xNew, int yNew) getBotMove(bool isBlack);
     }
 }
